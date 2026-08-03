@@ -1,0 +1,18 @@
+name: DE_Rocksalt
+description: A generic geological model for final repository system in host rock salt
+  in Germany.
+Quaternary:
+  source: voelkner2017
+  simplified_lithology: [Sandstone, Conglomerate]
+Tertiary:
+  source: voelkner2017
+  simplified_lithology: [Mudstone, Limestone]
+Buntsandstein:
+  source: voelkner2017
+  simplified_lithology: [Sandstone]
+Host_rock:
+  source: [liu2017, voelkner2017, bollingerfehr2018]
+  simplified_lithology: [Rocksalt]
+Rotliegend:
+  source: liu2017 and voelkner2017
+  simplified_lithology: [Sandstone]

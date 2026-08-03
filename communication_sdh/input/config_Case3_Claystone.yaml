@@ -1,0 +1,37 @@
+site_name: DE_South_Claystone
+
+tag_dict:
+  location: 
+    - Germany
+
+sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
+  electrical_resistivity: generate_lognorm
+  intrinsic_permeability: generate_lognorm
+
+#------------ Optional -------------#
+
+# merge_unit_rock_prop: 
+#   Quaternary: [Quaternary]
+#   Tertiary: [Tertiary]
+#   Jurassic_Upper: [Jurassic_Upper]
+#   Jurassic_Middle: [Jurassic_Middle_sequence1, Jurassic_Middle_sequence2]
+#   Host_rock: [Opalinus_Clay]
+#   Jurassic_Lower: [Jurassic_Lower_sequence1, Jurassic_Lower_sequence2]
+#   Keuper: [Keuper_sequence1, Keuper_sequence2, Keuper_sequence3]
+#   Muschelkalk: [Muschelkalk_Upper, Muschelkalk_Middle, Muschelkalk_Lower]
+# merge_unit_depth:
+#   Quaternary_top: 580.0
+#   Quaternary_bottom: 515.0
+#   Tertiary_bottom: 475.0
+#   Jurassic_Upper_bottom: 0.0
+#   Jurassic_Middle_bottom: -85.0
+#   Opalinus_Clay_bottom: -200.0
+#   Jurassic_Lower_bottom: -280.0
+#   Keuper_bottom: -450.0
+#   Muschelkalk_bottom: -575.0
+
+# path_to_save_rock_yaml: output/rock_data/DE_South_Claystone
+
+# path_to_save_site_yaml: output/site_data/DE_South_Claystone
+
+# path_to_save_site_geometry: output/geometry/DE_South_Claystone

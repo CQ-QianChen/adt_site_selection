@@ -1,0 +1,27 @@
+name: DE_South_Claystone
+description: A generic geological model for final repository system in clay host rock
+  in southern Germany.
+Quaternary:
+  source: reinhold2016
+  simplified_lithology: [Sandstone, Conglomerate]
+Tertiary:
+  source: reinhold2016
+  simplified_lithology: [Mudstone, Limestone]
+Jurassic_Upper:
+  source: reinhold2016
+  simplified_lithology: [Mudstone, Limestone]
+Jurassic_Middle:
+  source: reinhold2016
+  simplified_lithology: [Mudstone, Limestone, Sandstone]
+Host_rock:
+  source: hoth2007
+  simplified_lithology: [Mudstone, Sandstone]
+Jurassic_Lower:
+  source: reinhold2016
+  simplified_lithology: [Mudstone, Limestone, Sandstone]
+Keuper:
+  source: reinhold2016
+  simplified_lithology: [Mudstone, Limestone, Sandstone]
+Muschelkalk:
+  source: reinhold2016
+  simplified_lithology: [Dolostone, Rocksalt, Mudstone, Sandstone]

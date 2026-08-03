@@ -1,0 +1,133 @@
+density:
+- type: scalar
+  source: merged
+  value: 2622.98
+  value_min: 2478.0
+  value_max: 2800.0
+  value_std: 76.68
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-1.89, 2.31, loc=2622.98, scale=76.68).rvs(size=1000000,
+      random_state=21)
+  unit_str: kg/m^3
+  unit_base: [1, -3, 0, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 3 combined datasets with
+    ids: 000a434e-604f-56f0-9011-847104305820,112faa54-6a83-5192-a2a0-e4f2aa11789a,3fcad096-1882-513d-afe1-ab78b5a965bd.'
+  tag:
+    ID: d9bf06d9-c350-599e-88df-7aed9a2dc2b4
+electrical_resistivity:
+- type: scalar
+  source: merged
+  value: 559.83
+  value_min: 140.0
+  value_max: 980.0
+  value_std: 242.56
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.lognorm(s=0.54, scale=363.52, loc=140.0).rvs(size=1000000,
+      random_state=21)
+  unit_str: ohmm
+  unit_base: [1, 3, -3, 0, -2, 0, 0]
+  description: 'A lognormal distribution fitted from 1 dataset with id: d686bb2d-c5c6-5392-979f-aea268d4b06a.'
+  tag:
+    ID: c850db50-ee70-5b92-80b3-d92eac3bf442
+intrinsic_permeability:
+- type: scalar
+  source: merged
+  value: 4.92e-13
+  value_min: 8.86e-17
+  value_max: 3.36e-12
+  value_std: 6.83e-13
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.lognorm(s=1.04, scale=2.87e-13, loc=8.86e-17).rvs(size=1000000,
+      random_state=21)
+  unit_str: m^2
+  unit_base: [0, 2, 0, 0, 0, 0, 0]
+  description: 'A lognormal distribution fitted from 2 combined datasets with ids:
+    472587b3-2ead-52c2-a7c3-b7188875bc59,4aa8e260-3788-5dc8-91dd-68c3819ebcc8.'
+  tag:
+    ID: 2fe17bc1-376d-54db-99e7-173a2acfb665
+p_wave_velocity:
+- type: scalar
+  source: merged
+  value: 3808.7
+  value_min: 2155.95
+  value_max: 6223.96
+  value_std: 607.09
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-2.72, 3.98, loc=3808.7, scale=607.09).rvs(size=1000000,
+      random_state=21)
+  unit_str: m/s
+  unit_base: [0, 1, -1, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 4 combined datasets with
+    ids: 937b06b1-5713-5957-8f2c-eb8bd97eb89c,96ed3a2b-e6f1-55c1-aab9-e8d208a79912,c3fc24ac-0a42-5ee0-a313-562f44a254c6,d129ed06-41d9-520f-9da2-3203e1aa9f67.'
+  tag:
+    ID: a7ba1af7-0bec-50ce-84f3-8c2f62244572
+porosity:
+- type: scalar
+  source: merged
+  value: 0.05
+  value_min: 0.03
+  value_max: 0.07
+  value_std: 0.0116
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-1.72, 1.72, loc=0.05, scale=0.0116).rvs(size=1000000,
+      random_state=21)
+  unit_str: null
+  unit_base: [0, 0, 0, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 1 dataset with id: 8868efae-d3db-5aaf-8883-09df4b1d427c.'
+  tag:
+    ID: f14eb3b9-6406-5c6a-ae96-fcc2e6879b6a
+s_wave_velocity:
+- type: scalar
+  source: merged
+  value: 2158.62
+  value_min: 1178.04
+  value_max: 3434.84
+  value_std: 356.23
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-2.75, 3.58, loc=2158.62, scale=356.23).rvs(size=1000000,
+      random_state=21)
+  unit_str: m/s
+  unit_base: [0, 1, -1, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 3 combined datasets with
+    ids: 14eb4543-2d4e-5832-b004-095bb45c79b4,8f3a9174-81b5-5a5e-929f-7961f9127bfc,fa363cab-9c14-58c2-b20d-6ea412f6fe48.'
+  tag:
+    ID: b501385a-f059-56bd-8d91-841256067ac8
+specific_heat_capacity:
+- type: scalar
+  source: merged
+  value: 884.96
+  value_min: 790.0
+  value_max: 980.0
+  value_std: 54.86
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-1.73, 1.73, loc=884.96, scale=54.86).rvs(size=1000000,
+      random_state=21)
+  unit_str: J/kg/K
+  unit_base: [0, 2, -2, -1, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 1 dataset with id: 218c7ef7-95fd-55f3-8c35-27cfe94f5ce7.'
+  tag:
+    ID: ee1d01bf-e32f-59f3-a9cd-8a0e160562bf
+thermal_conductivity:
+- type: scalar
+  source: merged
+  value: 2.77
+  value_min: 2.0
+  value_max: 4.0
+  value_std: 0.52
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-1.48, 2.37, loc=2.77, scale=0.52).rvs(size=1000000,
+      random_state=21)
+  unit_str: W/m/K
+  unit_base: [1, 1, -3, -1, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 2 combined datasets with
+    ids: 5dad755e-e2fc-592f-935b-b1525c37e234,7f961df9-149d-5aee-9653-24a7594bd60a.'
+  tag:
+    ID: 5eda438b-b88d-5622-bf74-0ac22555db7c

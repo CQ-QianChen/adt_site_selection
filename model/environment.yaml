@@ -1,0 +1,8 @@
+name: Yaml2OGSprj
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.10
+  - pip:
+      - git+ssh://git@gitlab.git.nrw/qian.chen1/Yaml2OGSprj.git

@@ -1,0 +1,8 @@
+I-129:
+  source: ICRP2008
+  alpha: 0.0
+  electron: 1.0430169887340001e-14
+  photon: 4.0374851176800005e-15
+  total: 1.4451633238680003e-14
+  unit_str: kg*m^3/s^2
+  unit_base: [1, 2, -2, 0, 0, 0, 0]

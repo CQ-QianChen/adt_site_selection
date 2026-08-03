@@ -1,0 +1,18 @@
+name: DE_Crystalline
+description: A generic geological model for final repository system in crystalline
+  host rock in Germany.
+Quaternary:
+  source: weitkamp2021
+  simplified_lithology: [Sandstone, Conglomerate]
+Muschelkalk:
+  source: weitkamp2021
+  simplified_lithology: [Mudstone, Limestone]
+Buntsandstein:
+  source: weitkamp2021
+  simplified_lithology: [Mudstone, Sandstone]
+Zechstein:
+  source: weitkamp2021
+  simplified_lithology: [Rocksalt]
+Host_rock:
+  source: weitkamp2021
+  simplified_lithology: [Crystalline]

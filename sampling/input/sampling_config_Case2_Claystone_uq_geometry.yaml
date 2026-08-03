@@ -1,0 +1,18 @@
+# number of samples to generate
+sample_size: 128
+
+# 'random' for SciPy-based sampling, or 'sobol' / 'latin_hypercube' for SciPy QMC experimental design.
+sampling_method: sobol
+
+# random seed for reproducibility.
+seed: 21
+
+units:
+  Jurassic_Middle_bottom:
+    - -100
+    - -50
+  Host_rock_bottom:
+    - -250
+    - -200
+
+

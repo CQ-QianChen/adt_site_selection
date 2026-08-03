@@ -1,0 +1,17 @@
+I-129:
+- type: scalar
+  source: merged
+  value: 0.00179
+  value_min: 0.0
+  value_max: 0.0158
+  value_std: 0.00352
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.lognorm(s=1.26, scale=0.000811, loc=0.0).rvs(size=1000000,
+      random_state=21)
+  unit_str: m^3/kg
+  unit_base: [-1, 3, 0, 0, 0, 0, 0]
+  description: 'A lognormal distribution fitted from 12 combined datasets with ids:
+    0252b747-8f04-55d8-b79e-a3d4c35d249a,18d3664b-b3cf-5463-a4c4-708bc66db24a,2b8ef203-f63c-5102-9d7e-32f3e858e136,2cdb5c91-7a13-514d-92c3-f75b85fd7ffa,370873ab-a70d-529d-b0a0-1d1773dbad37,4eb0ee5d-e87c-5341-8686-5dbe71659bad,5f86d3cf-b904-5c5e-b56f-c23fd83f9f1f,8ea3ca35-4613-56f1-b797-d883e7c937bc,bb49b21a-9ea2-50ff-9691-d515872f457e,bbfbbf4f-07b2-5395-a60c-27aa7bfa4b7e,d68e85bb-f89b-58b2-a74a-074ed2c9dc8d,fe90297e-2a9d-548f-91c4-695f9535544d.'
+  tag:
+    ID: 29d78e6d-041d-5808-839a-64ceeaa813c1

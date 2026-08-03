@@ -1,0 +1,8 @@
+name: smart_data_hub
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.10
+  - pip:
+      - git+https://github.com/mbd-rwth/smart_data_hub.git@v2.0.0

@@ -1,0 +1,9 @@
+site_name: DE_Rocksalt
+
+tag_dict:
+  location: 
+    - Germany
+
+sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
+  electrical_resistivity: generate_lognorm
+  intrinsic_permeability: generate_lognorm

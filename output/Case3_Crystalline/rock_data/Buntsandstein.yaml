@@ -1,0 +1,133 @@
+density:
+- type: scalar
+  source: merged
+  value: 2337.54
+  value_min: 1706.4
+  value_max: 3041.35
+  value_std: 231.4
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-2.73, 3.04, loc=2337.54, scale=231.4).rvs(size=1000000,
+      random_state=21)
+  unit_str: kg/m^3
+  unit_base: [1, -3, 0, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 2 combined datasets with
+    ids: 28626497-1617-5ce9-b7e2-d90680496c54,ba536e29-e7b3-5b54-8518-752036fa779d.'
+  tag:
+    ID: 13e94712-571a-530d-8332-c42741b8c9c2
+electrical_resistivity:
+- type: scalar
+  source: merged
+  value: 75.76
+  value_min: 1.22
+  value_max: 757.09
+  value_std: 102.12
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.lognorm(s=1.03, scale=43.95, loc=1.22).rvs(size=1000000,
+      random_state=21)
+  unit_str: ohmm
+  unit_base: [1, 3, -3, 0, -2, 0, 0]
+  description: 'A lognormal distribution fitted from 2 combined datasets with ids:
+    5133cfd0-3684-5785-ad1c-47383cca3521,bf01df8b-745a-5bae-bfd3-7ab53e5d2c57.'
+  tag:
+    ID: 0956fac4-c61a-5b80-bfbf-d6b02bf23e9f
+intrinsic_permeability:
+- type: scalar
+  source: merged
+  value: 3.45e-13
+  value_min: 7.68e-22
+  value_max: 1.53e-12
+  value_std: 4.17e-13
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.lognorm(s=0.95, scale=2.2e-13, loc=7.68e-22).rvs(size=1000000,
+      random_state=21)
+  unit_str: m^2
+  unit_base: [0, 2, 0, 0, 0, 0, 0]
+  description: 'A lognormal distribution fitted from 4 combined datasets with ids:
+    0d854a14-f773-5d6b-9c1c-9c63d3517f95,6330ea20-dc3c-51b1-8257-b92bca804976,b9f20a8c-4c06-5ae4-9b92-156d0cef5046,e763e817-3658-50a5-ad06-8b5524a271d4.'
+  tag:
+    ID: ca6f81ce-e83b-5280-9ecf-9ad3226c8267
+p_wave_velocity:
+- type: scalar
+  source: merged
+  value: 2513.66
+  value_min: 1514.03
+  value_max: 3524.77
+  value_std: 326.37
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-3.06, 3.1, loc=2513.66, scale=326.37).rvs(size=1000000,
+      random_state=21)
+  unit_str: m/s
+  unit_base: [0, 1, -1, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 1 dataset with id: f3552e23-9896-51ce-bd2e-b6ade62623c5.'
+  tag:
+    ID: d9fd9bcc-0f5e-549c-9dff-cd28f7bc41c1
+porosity:
+- type: scalar
+  source: merged
+  value: 0.0517
+  value_min: 0.005
+  value_max: 0.15
+  value_std: 0.0395
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-1.18, 2.49, loc=0.0517, scale=0.0395).rvs(size=1000000,
+      random_state=21)
+  unit_str: null
+  unit_base: [0, 0, 0, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 3 combined datasets with
+    ids: 56804a22-caea-59ec-8868-e4b4fd605c06,69cae4c1-4f93-5195-ae15-8485f25bf2d4,f781f4a9-403d-5ed9-ae16-6e37c39fa3e1.'
+  tag:
+    ID: 20cf9699-b36f-5e3e-9c2a-b5d6fd7a45d6
+s_wave_velocity:
+- type: scalar
+  source: merged
+  value: 1498.96
+  value_min: 915.37
+  value_max: 2088.71
+  value_std: 190.5
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-3.06, 3.1, loc=1498.96, scale=190.5).rvs(size=1000000,
+      random_state=21)
+  unit_str: m/s
+  unit_base: [0, 1, -1, 0, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 1 dataset with id: ea3da890-deab-502b-a75a-d80d14e42773.'
+  tag:
+    ID: e08a561e-aee8-51c4-8e71-af54458ab89c
+specific_heat_capacity:
+- type: scalar
+  source: merged
+  value: 759.61
+  value_min: 559.34
+  value_max: 961.42
+  value_std: 65.74
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-3.05, 3.07, loc=759.61, scale=65.74).rvs(size=1000000,
+      random_state=21)
+  unit_str: J/kg/K
+  unit_base: [0, 2, -2, -1, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 1 dataset with id: 9af6212d-745d-55dd-bef0-d73fd221ab7c.'
+  tag:
+    ID: ac3c4b12-e921-5799-8123-68b5ba12e1bf
+thermal_conductivity:
+- type: scalar
+  source: merged
+  value: 2.28
+  value_min: 0.66
+  value_max: 4.42
+  value_std: 0.6
+  probability_distribution:
+    sample_size: 1000000
+    sampled_data: scipy.stats.truncnorm(-2.7, 3.57, loc=2.28, scale=0.6).rvs(size=1000000,
+      random_state=21)
+  unit_str: W/m/K
+  unit_base: [1, 1, -3, -1, 0, 0, 0]
+  description: 'A truncated normal distribution fitted from 2 combined datasets with
+    ids: 619b1e58-2368-5970-ac94-4cef30bac299,fe2ff333-c6dc-5213-8c51-8edbe0af02a6.'
+  tag:
+    ID: 4124d8f6-db1b-5151-90c1-7d7883fb3780
