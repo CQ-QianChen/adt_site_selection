@@ -1,2 +1,5 @@
 I-129:
-  value: anion
+  source: iaea2009
+  species_type: anion
+  element_category: halogen
+  description: Iodine-129 exists predominantly as the simple iodide anion.
