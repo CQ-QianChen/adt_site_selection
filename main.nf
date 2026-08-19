@@ -22,18 +22,6 @@ def computeHash8(data) {
     return hex[-8..-1]
 }
 
-def resolveSamplingCombinations(cfg) {
-    def combos = []
-    cfg.sample_size.each { sz ->
-        cfg.sampling_method.each { m ->
-            cfg.seed.each { sd ->
-                combos << [sample_size: sz, sampling_method: m, seed: sd, save_file_type: cfg.save_file_type]
-            }
-        }
-    }
-    return combos
-}
-
 process COMMUNICATION_SDH {
     conda "$moduleDir/communication_sdh/environment.yaml"
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
@@ -135,23 +123,15 @@ process COMMUNICATION_NTD {
 
 workflow {
     def case_name = file(params.config_file).getBaseName()
-    def case_cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
-    def hash8 = computeHash8(case_cfg.findAll { k, v -> k != 'sampling' })
+    def cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+    def case_cfg = cfg.findAll { k, v -> k != 'sampling' }
+    def hash8 = computeHash8(case_cfg)
 
-    def sampling_combos = resolveSamplingCombinations(case_cfg.sampling)
-    def resolved_case_cfg = case_cfg + [sampling: sampling_combos]
+    COMMUNICATION_SDH(toYaml(case_cfg), case_name, hash8)
 
-    COMMUNICATION_SDH(toYaml(resolved_case_cfg), case_name, hash8)
+    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, cfg.site_name)
 
-    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, case_cfg.site_name)
-
-    def sampling_cfg = [uncertain_parameters: case_cfg.uncertain_parameters]
-    def sampling_combinations = Channel.fromList(sampling_combos).multiMap { combo ->
-        size: combo.sample_size
-        method: combo.sampling_method
-        seed: combo.seed
-    }
-
+    def sampling_cfg = [uncertain_parameters: cfg.uncertain_parameters]
     SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
         toYaml(sampling_cfg),
@@ -161,9 +141,9 @@ workflow {
         COMMUNICATION_SDH.out.rock_data,
         COMMUNICATION_NTD.out.nuclide_sorption_data,
         COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        sampling_combinations.size,
-        sampling_combinations.method,
-        sampling_combinations.seed,
-        case_cfg.sampling.save_file_type
+        cfg.sampling.sample_size,
+        cfg.sampling.sampling_method,
+        cfg.sampling.seed,
+        cfg.sampling.save_file_type
     )
 }

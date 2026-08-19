@@ -89,7 +89,7 @@ uncertain_parameters:
       - I-129
 
 sampling:
-  sample_size: [4]
-  sampling_method: [sobol]
-  seed: [21]
+  sample_size: 4
+  sampling_method: sobol
+  seed: 21
   save_file_type: HDF5
