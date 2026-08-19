@@ -1,0 +1,7 @@
+name: adt_site_selection
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - nextflow
+  - openjdk=21
