@@ -2,6 +2,7 @@
 python -m nuctransportdb.export_data \
 --config ./communication_ntd/input/config_Case3_Crystalline.yaml \
 --path_to_site_yaml_file output/Case3_Crystalline/site_data/DE_Crystalline.yaml \
---path_to_save_sorption_data output/Case3_Crystalline/nuclide_data/sorption_data \
---path_to_save_nuclide_species_data output/Case3_Crystalline/nuclide_data \
---path_to_save_nuclide_emitted_energy_data output/Case3_Crystalline/nuclide_data \
+--path_to_save_sorption_data output/Case3_Crystalline/nuclide_sorption_data \
+--path_to_save_nuclide_species_data output/Case3_Crystalline/nuclide_species_data \
+--path_to_save_nuclide_water_diffusivity_data output/Case3_Crystalline/nuclide_water_diffusivity_data \
+--path_to_save_nuclide_emitted_energy_data output/Case3_Crystalline/nuclide_emitted_energy_data \
