@@ -95,3 +95,28 @@ merge_unit_depth:
 
 nuclide_to_consider:
   - I-129
+
+uncertain_parameters:
+  rock_data:
+    Aptian:
+      - porosity
+      - density
+    Host_rock:
+      - porosity
+      - density
+    Valanginian_Wealden:
+      - porosity
+      - density
+  nuclide_water_diffusivity_data:
+    Aptian:
+      - I-129
+    Host_rock:
+      - I-129
+    Valanginian_Wealden:
+      - I-129
+
+sampling:
+  sample_size: [4]
+  sampling_method: [sobol]
+  seed: [21]
+  save_file_type: HDF5

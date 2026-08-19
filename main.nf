@@ -22,6 +22,18 @@ def computeHash8(data) {
     return hex[-8..-1]
 }
 
+def resolveSamplingCombinations(cfg) {
+    def combos = []
+    cfg.sample_size.each { sz ->
+        cfg.sampling_method.each { m ->
+            cfg.seed.each { sd ->
+                combos << [sample_size: sz, sampling_method: m, seed: sd, save_file_type: cfg.save_file_type]
+            }
+        }
+    }
+    return combos
+}
+
 process COMMUNICATION_SDH {
     conda "$moduleDir/communication_sdh/environment.yaml"
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
@@ -46,6 +58,47 @@ process COMMUNICATION_SDH {
       --path_to_save_rock_yaml rock_data \
       --path_to_save_site_yaml site_data \
       --path_to_save_site_geometry geometry
+    """
+}
+
+process SAMPLING {
+    conda "$moduleDir/sampling/environment.yaml"
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+
+    input:
+    path script
+    val params_yaml
+    val case_name
+    val hash8
+    path geometry
+    path rock_data
+    path nuclide_sorption_data
+    path nuclide_water_diffusivity_data
+    val sample_size
+    val sampling_method
+    val seed
+    val save_file_type
+
+    output:
+    path "sampled_data/*", emit: sampled_data
+
+    script:
+    """
+    echo "${params_yaml}" > params.yaml
+
+    mkdir -p sampled_data
+
+    python ${script} \
+      --config params.yaml \
+      --sample_size ${sample_size} \
+      --sampling_method ${sampling_method} \
+      --seed ${seed} \
+      --path_to_geometry_data ${geometry} \
+      --path_to_rock_data ${rock_data} \
+      --path_to_sorption_data ${nuclide_sorption_data} \
+      --path_to_diffusivity_data ${nuclide_water_diffusivity_data} \
+      --path_to_save_sampled_data sampled_data \
+      --save_file_type ${save_file_type}
     """
 }
 
@@ -83,9 +136,34 @@ process COMMUNICATION_NTD {
 workflow {
     def case_name = file(params.config_file).getBaseName()
     def case_cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
-    def hash8 = computeHash8(case_cfg)
+    def hash8 = computeHash8(case_cfg.findAll { k, v -> k != 'sampling' })
 
-    COMMUNICATION_SDH(toYaml(case_cfg), case_name, hash8)
+    def sampling_combos = resolveSamplingCombinations(case_cfg.sampling)
+    def resolved_case_cfg = case_cfg + [sampling: sampling_combos]
+
+    COMMUNICATION_SDH(toYaml(resolved_case_cfg), case_name, hash8)
 
     COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, case_cfg.site_name)
+
+    def sampling_cfg = [uncertain_parameters: case_cfg.uncertain_parameters]
+    def sampling_combinations = Channel.fromList(sampling_combos).multiMap { combo ->
+        size: combo.sample_size
+        method: combo.sampling_method
+        seed: combo.seed
+    }
+
+    SAMPLING(
+        file("$moduleDir/sampling/sampling_func.py"),
+        toYaml(sampling_cfg),
+        case_name,
+        hash8,
+        COMMUNICATION_SDH.out.geometry,
+        COMMUNICATION_SDH.out.rock_data,
+        COMMUNICATION_NTD.out.nuclide_sorption_data,
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+        sampling_combinations.size,
+        sampling_combinations.method,
+        sampling_combinations.seed,
+        case_cfg.sampling.save_file_type
+    )
 }

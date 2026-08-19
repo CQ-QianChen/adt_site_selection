@@ -95,3 +95,15 @@ merge_unit_depth:
 
 nuclide_to_consider:
   - I-129
+
+uncertain_parameters:
+  geometry:
+    rock_interface:
+      - Aptian_bottom
+      - Host_rock_bottom
+
+sampling:
+  sample_size: [4]
+  sampling_method: [sobol]
+  seed: [21]
+  save_file_type: HDF5
