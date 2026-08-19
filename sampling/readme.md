@@ -5,44 +5,103 @@ without running any OGS simulations
 
 ## Usage (example)
 
+Go to the directory that contains ``sampling_func.py``, then run:
+
+
+optional (allow the access to the file):
+```console
+chmod +x ../input/Case3_Claystone.sh
+```
+Then:
+```console
+./input/Case3_Claystone.sh
+```
+
+The ``Case3_Claystone.sh`` file has the following entries:
+
 ```
 #!/bin/bash
 python -m sampling_func \
---config ./input/sampling_config_Case2_Claystone_uq_geometry.yaml \
---path_to_rock_data ../output/Case2_Claystone_uq_geometry/rock_data \
---path_to_sorption_data ../output/Case2_Claystone_uq_geometry/sorption_data \
---path_to_save_sampled_data ../output/Case2_Claystone_uq_geometry/sampled_data \
---save_file_type pickle \
+--config ./input/sampling_config_Case3_Claystone.yaml \
+--sample_size 4 \
+--sampling_method sobol \
+--seed 21 \
+--path_to_geometry_data ../output/Case3_Claystone/geometry \
+--path_to_rock_data ../output/Case3_Claystone/rock_data \
+--path_to_sorption_data ../output/Case3_Claystone/nuclide_sorption_data \
+--path_to_diffusivity_data ../output/Case3_Claystone/nuclide_water_diffusivity_data \
+--path_to_save_sampled_data ../output/Case3_Claystone/sampled_data \
+--save_file_type HDF5 \
 ```
+
+- Note: use "random", "sobol",or  "latin_hypercube" for the `--sampling_method` argument. The default is "random".
 
 ## input (a config YAML file)
 
 ```yaml
-- `sample_size`: number of samples to draw.
-- `sample_type`: `random` for SciPy-based sampling, or`sobol` / `latin_hypercube` for SciPy QMC experimental design.
-- `seed`: fixes the draws so the same seed always reproduces the same
-output.
-- `units`: `{layer_name: [low, high]}` - the range each layer's bottom
-  depth is drawn from.
-- `medium_properties`: `{rock: [prop_name_or_{prop: [values]}, ...]}` - a
-  bare property name draws it from the database's distribution; a
-  `{prop: [values]}` entry uses exactly those fixed values instead (must
-  list `sample_size` of them).
-- `nuclide_properties`: `{rock: {nuclide: [same shape as medium_properties'
-  list]}}`.
+uncertain_parameters:
+  geometry:
+    rock_interface:
+      - interface_name: 
+      -...
+  rock_data:
+    rock_name1:
+      - rock_property_name1
+      - ...
+    rock_name2:
+    ...
+
+  nuclide_water_diffusivity_data:
+    rock_name1:
+      - nuclide1
+      - ...
+    rock_name2:
+    ...
+  nuclide_sorption_data:
+    rock_name1:
+      - nuclide1
+      - ...
+    rock_name2:
+    ...
 ```
 - Note: 
-  - Entries for `units`, `medium_properties` and `nuclide_properties` are optional.
-  - `units` are drawn uniformly at random within the given
-    `[low, high]` range, and every other property is drawn from whatever
-    distribution is defined for it in the database 
+  - Entries for `geometry`, `nuclide_water_diffusivity_data` and `nuclide_sorption_data` are optional.
 
-## output (YAML or pickle file) 
+## output (YAML, pickle, or HDF5 file) 
 ```yaml
-- `units`:  `{layer_name: [values]}`
-- `medium_properties`: `{rock: {property_name: [values]}}`
-- `nuclide_properties`: `{rock: {nuclide: {property_name: [values]}}}`
-- `material_properties`: `{rock: {property_name: [values]}}` - a
-  nuclide-specific property is named `"{nuclide}_{property}"`.
+uncertain_parameters:
+  geometry:
+    rock_interface:
+      interface_name: [...]
+      ...
+  rock_data:
+    rock_name1:
+      rock_property_name1: [...]
+      ...
+    rock_name2:
+    ...
+
+  nuclide_water_diffusivity_data:
+    rock_name1:
+      nuclide1: [...]
+      ...
+    rock_name2:
+    ...
+  nuclide_sorption_data:
+    rock_name1:
+      nuclide1: [...]
+      ...
+    rock_name2:
+    ...
 ```
-- Note: `material_properties` combines outputs from `medium_properties` and `material_properties`
+- Note: 
+  - Sampled values for appended to the lists.
+
+### Read saved sampled data back to Python dictionary, use load_sampled_data function from sampling_func.py, e.g.:
+
+```python
+from sampling_func import load_sampled_data
+
+sampled_data_file_path = "../..h5" # make sure you have the right path
+sampled_data = load_sampled_data(sampled_data_file_path)
+```

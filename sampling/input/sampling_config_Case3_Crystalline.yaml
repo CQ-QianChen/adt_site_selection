@@ -1,16 +1,19 @@
-# number of samples to generate
-sample_size: 128
-
-# 'random' for SciPy-based sampling, or 'sobol' / 'latin_hypercube' for SciPy QMC experimental design.
-sampling_method: sobol
-
-# random seed for reproducibility.
-seed: 21
-
-medium_properties:
-  Host_rock:
-    - porosity
-    - intrinsic_permeability
-    - density
-
+uncertain_parameters:
+  rock_data:
+    Zechstein:
+      - porosity
+      - density
+    Host_rock:
+      - porosity
+      - density
+    basement:
+      - porosity
+      - density
+  nuclide_water_diffusivity_data:
+    Zechstein:
+      - I-129
+    Host_rock:
+      - I-129
+    basement:
+      - I-129
 
