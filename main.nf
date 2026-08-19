@@ -39,7 +39,7 @@ process COMMUNICATION_SDH {
 
     script:
     """
-    echo "${params_yaml}" > params.yml
+    echo "${params_yaml}" > params.yaml
 
     python -m smart_data_hub.export_data \
       --config params.yml \
