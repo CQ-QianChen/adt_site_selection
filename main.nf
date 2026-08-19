@@ -49,6 +49,47 @@ process COMMUNICATION_SDH {
     """
 }
 
+process SAMPLING {
+    conda "$moduleDir/sampling/environment.yaml"
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+
+    input:
+    path script
+    val params_yaml
+    val case_name
+    val hash8
+    path geometry
+    path rock_data
+    path nuclide_sorption_data
+    path nuclide_water_diffusivity_data
+    val sample_size
+    val sampling_method
+    val seed
+    val save_file_type
+
+    output:
+    path "sampled_data/*", emit: sampled_data
+
+    script:
+    """
+    echo "${params_yaml}" > params.yaml
+
+    mkdir -p sampled_data
+
+    python ${script} \
+      --config params.yaml \
+      --sample_size ${sample_size} \
+      --sampling_method ${sampling_method} \
+      --seed ${seed} \
+      --path_to_geometry_data ${geometry} \
+      --path_to_rock_data ${rock_data} \
+      --path_to_sorption_data ${nuclide_sorption_data} \
+      --path_to_diffusivity_data ${nuclide_water_diffusivity_data} \
+      --path_to_save_sampled_data sampled_data \
+      --save_file_type ${save_file_type}
+    """
+}
+
 process COMMUNICATION_NTD {
     conda "$moduleDir/communication_ntd/environment.yaml"
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
@@ -82,10 +123,27 @@ process COMMUNICATION_NTD {
 
 workflow {
     def case_name = file(params.config_file).getBaseName()
-    def case_cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+    def cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+    def case_cfg = cfg.findAll { k, v -> k != 'sampling' }
     def hash8 = computeHash8(case_cfg)
 
     COMMUNICATION_SDH(toYaml(case_cfg), case_name, hash8)
 
-    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, case_cfg.site_name)
+    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, cfg.site_name)
+
+    def sampling_cfg = [uncertain_parameters: cfg.uncertain_parameters]
+    SAMPLING(
+        file("$moduleDir/sampling/sampling_func.py"),
+        toYaml(sampling_cfg),
+        case_name,
+        hash8,
+        COMMUNICATION_SDH.out.geometry,
+        COMMUNICATION_SDH.out.rock_data,
+        COMMUNICATION_NTD.out.nuclide_sorption_data,
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+        cfg.sampling.sample_size,
+        cfg.sampling.sampling_method,
+        cfg.sampling.seed,
+        cfg.sampling.save_file_type
+    )
 }

@@ -1,7 +1,12 @@
 #!/bin/bash
 python -m sampling_func \
 --config ./input/sampling_config_Case3_Rocksalt.yaml \
+--sample_size 4 \
+--sampling_method sobol \
+--seed 21 \
+--path_to_geometry_data ../output/Case3_Rocksalt/geometry \
 --path_to_rock_data ../output/Case3_Rocksalt/rock_data \
---path_to_sorption_data ../output/Case3_Rocksalt/nuclide_data/sorption_data \
+--path_to_sorption_data ../output/Case3_Rocksalt/nuclide_sorption_data \
+--path_to_diffusivity_data ../output/Case3_Rocksalt/nuclide_water_diffusivity_data \
 --path_to_save_sampled_data ../output/Case3_Rocksalt/sampled_data \
---save_file_type YAML \
+--save_file_type HDF5 \
