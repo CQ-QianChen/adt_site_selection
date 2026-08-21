@@ -120,3 +120,118 @@ sampling:
   sampling_method: sobol
   seed: 21
   save_file_type: HDF5
+
+model_config:
+  project_name: Case1_Claystone_Lower-Saxony
+  create_python_bc: True
+  python_bc_source_value: 0.0022
+  create_meshes: True
+  mesh_dimension: 1
+  quantity_of_interests:
+    - concentration
+    - Flux
+  source:
+    type: point
+    loc: -462.5
+  process_variables:
+    - pressure
+    - concentration
+  secondary_variables:
+    - Flux
+  initial_condition_nuclide:
+    type:
+      - Constant
+    value:
+      - 0.0
+  boundary_condition_nuclide:
+    type:
+      - Python
+    mesh:
+      - reactive_domain
+    value:
+      - bc_c
+  pressure_setup:
+    pressure_initial: 100000.0
+    pressure_top: 100000.0
+    pressure_bottom: 1000000.0
+  decay: true
+  diffusion: true
+  advection: false
+  sorption: true
+  sim_setup:
+    timeloop:
+      processes:
+        nonlinear_solver_name: basic_picard
+        convergence_type: PerComponentDeltaX
+        norm_type: NORM2
+        time_discretization: BackwardEuler
+        time_stepping:
+          type: FixedTimeStepping
+          t_initial: 0.0
+          t_end: 31557600000000.0
+          time_step:
+          - 31557600.0
+          - 315576000.0
+          - 3155760000.0
+          - 31557600000.0
+          - 315576000000.0
+          repeat:
+          - 100
+          - 90
+          - 90
+          - 90
+          - 90
+      output:
+        repeat:
+        - '10'
+        - '9'
+        - '9'
+        - '9'
+        - '9'
+        each_steps:
+        - '10'
+        - '10'
+        - '10'
+        - '10'
+        - '10'
+    non_linear_solver:
+      name: basic_picard
+      type: Picard
+      max_iter: '10'
+      linear_solver: general_linear_solver
+    linear_solver:
+      name:
+      - general_linear_solver
+      - general_linear_solver
+      - general_linear_solver
+      kind:
+      - lis
+      - eigen
+      - petsc
+      prefix:
+      - null
+      - null
+      - hc
+      solver_type:
+      - cg
+      - SparseLU
+      - bcgs
+      precon_type:
+      - jacobi
+      - ILUT
+      - bjacobi
+      max_iteration_step:
+      - '20000'
+      - '10000'
+      - '20000'
+      error_tolerance:
+      - 1e-16
+      - 1e-14
+      - 1e-8
+  get_field_component_index: [0, 1, 2]
+
+simulator_config:
+  n_jobs: 4
+  parallel: True
+  keep_vtu: False
+  sort_by_index: 2
