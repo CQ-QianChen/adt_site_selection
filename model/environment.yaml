@@ -1,8 +1,8 @@
-name: Yaml2OGSprj
+name: yaml2nuctrans
 channels:
   - conda-forge
 dependencies:
   - pip
   - python=3.10
   - pip:
-      - git+ssh://git@gitlab.git.nrw/qian.chen1/Yaml2OGSprj.git
+      - git+https://github.com/CQ-QianChen/yaml2nuctrans.git@v1.0.0
