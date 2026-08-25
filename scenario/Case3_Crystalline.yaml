@@ -1,64 +1,65 @@
-site_name: DE_Crystalline
+communication_sdh:
+  site_name: DE_Crystalline
 
-tag_dict:
-  location: 
-    - Baden-Wuerttemberg
+  tag_dict:
+    location:
+      - Baden-Wuerttemberg
 
-# optional 
-sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
-  electrical_resistivity: generate_lognorm
-  intrinsic_permeability: generate_lognorm
+  # optional
+  sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
+    electrical_resistivity: generate_lognorm
+    intrinsic_permeability: generate_lognorm
 
-# optional
-merge_unit_rock_prop:
-  Quaternary: [Quaternary]
-  Muschelkalk: [Muschelkalk]
-  Buntsandstein: [Buntsandstein]
-  Zechstein: [Zechstein_Rocksalt, Zechstein_Potash, Zechstein_Anhydrite]
-  Host_rock: [Granite]
-  basement: [Granite]
+  # optional
+  merge_unit_rock_prop:
+    Quaternary: [Quaternary]
+    Muschelkalk: [Muschelkalk]
+    Buntsandstein: [Buntsandstein]
+    Zechstein: [Zechstein_Rocksalt, Zechstein_Potash, Zechstein_Anhydrite]
+    Host_rock: [Granite]
+    basement: [Granite]
 
-# optional
-merge_unit_depth: 
-  Quaternary_top:
-    value: 0.0
-    value_min: -10.0
-    value_max: 10.0
-    sampling_function: generate_uniform
-  Quaternary_bottom: 
-    value: -50.0
-    value_min: -60.0
-    value_max: -40.0
-    sampling_function: generate_uniform
-  Muschelkalk_bottom: 
-    value: -100.0
-    value_min: -110.0
-    value_max: -90.0
-    sampling_function: generate_uniform
-  Buntsandstein_bottom: 
-    value: -400.0
-    value_min: -415.0
-    value_max: -385.0
-    sampling_function: generate_uniform
-  Zechstein_bottom: 
-    value: -1000.0
-    value_min: -1025.0
-    value_max: -975.0
-    sampling_function: generate_uniform
-  Host_rock_bottom: 
-    value: -1175.0
-    value_min: -1200.0
-    value_max: -1150.0
-    sampling_function: generate_uniform
-  basement_bottom: 
-    value: -1800.0
-    value_min: -1900.0
-    value_max: -1700.0
-    sampling_function: generate_uniform
+  # optional
+  merge_unit_depth:
+    Quaternary_top:
+      value: 0.0
+      value_min: -10.0
+      value_max: 10.0
+      sampling_function: generate_uniform
+    Quaternary_bottom:
+      value: -50.0
+      value_min: -60.0
+      value_max: -40.0
+      sampling_function: generate_uniform
+    Muschelkalk_bottom:
+      value: -100.0
+      value_min: -110.0
+      value_max: -90.0
+      sampling_function: generate_uniform
+    Buntsandstein_bottom:
+      value: -400.0
+      value_min: -415.0
+      value_max: -385.0
+      sampling_function: generate_uniform
+    Zechstein_bottom:
+      value: -1000.0
+      value_min: -1025.0
+      value_max: -975.0
+      sampling_function: generate_uniform
+    Host_rock_bottom:
+      value: -1175.0
+      value_min: -1200.0
+      value_max: -1150.0
+      sampling_function: generate_uniform
+    basement_bottom:
+      value: -1800.0
+      value_min: -1900.0
+      value_max: -1700.0
+      sampling_function: generate_uniform
 
-
-nuclide_to_consider:
-  - I-129
+communication_ntd:
+  nuclide_to_consider:
+    - I-129
 
 uncertain_parameters:
   rock_data:
@@ -79,13 +80,13 @@ uncertain_parameters:
     basement:
       - I-129
 
-sampling:
+sampling_config:
   sample_size: 4
   sampling_method: sobol
   seed: 21
   save_file_type: HDF5
 
-model_config:
+model:
   project_name: Case3_Crystalline
   create_python_bc: True
   python_bc_source_value: 0.0022
