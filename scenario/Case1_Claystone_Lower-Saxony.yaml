@@ -1,100 +1,101 @@
-site_name: DE_North_Claystone
+communication_sdh:
+  site_name: DE_North_Claystone
 
-tag_dict:
-  location: 
-    - Lower-Saxony
+  tag_dict:
+    location:
+      - Lower-Saxony
 
-# optional
-sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
-  electrical_resistivity: generate_lognorm
-  intrinsic_permeability: generate_lognorm
+  # optional
+  sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
+    electrical_resistivity: generate_lognorm
+    intrinsic_permeability: generate_lognorm
 
-# optional
-merge_unit_rock_prop:
-  Quaternary: [Quaternary]
-  Albian: [Albian]
-  Aptian: [Aptian]
-  Host_rock: [Barremian, Hauterivian]
-  Valanginian_Wealden: [Valanginian, Wealden]
-  Jurassic_Upper: [Jurassic_Upper]
-  Jurassic_Middle: [Jurassic_Middle]
-  Jurassic_Lower: [Jurassic_Lower]
-  Keuper: [Keuper]
-  Buntsandstein_Muschelkalk: [Buntsandstein_Muschelkalk, Muschelkalk]
-  Zechstein: [Zechstein]
-  basement: [Zechstein]
+  # optional
+  merge_unit_rock_prop:
+    Quaternary: [Quaternary]
+    Albian: [Albian]
+    Aptian: [Aptian]
+    Host_rock: [Barremian, Hauterivian]
+    Valanginian_Wealden: [Valanginian, Wealden]
+    Jurassic_Upper: [Jurassic_Upper]
+    Jurassic_Middle: [Jurassic_Middle]
+    Jurassic_Lower: [Jurassic_Lower]
+    Keuper: [Keuper]
+    Buntsandstein_Muschelkalk: [Buntsandstein_Muschelkalk, Muschelkalk]
+    Zechstein: [Zechstein]
+    basement: [Zechstein]
 
-# optional
-merge_unit_depth: 
-  Quaternary_top:
-    value: 0.0
-    value_min: -10.0
-    value_max: 10.0
-    sampling_function: generate_uniform
-  Quaternary_bottom: 
-    value: -50.0
-    value_min: -60.0
-    value_max: -40.0
-    sampling_function: generate_uniform
-  Albian_bottom: 
-    value: -100.0
-    value_min: -110.0
-    value_max: -90.0
-    sampling_function: generate_uniform
-  Aptian_bottom: 
-    value: -400.0
-    value_min: -415.0
-    value_max: -385.0
-    sampling_function: generate_uniform
-  Host_rock_bottom: 
-    value: -525.0
-    value_min: -535.0
-    value_max: -510.0
-    sampling_function: generate_uniform
-  Valanginian_Wealden_bottom: 
-    value: -650.0
-    value_min: -675.0
-    value_max: -625.0
-    sampling_function: generate_uniform
-  Jurassic_Upper_bottom: 
-    value: -800.0
-    value_min: -825.0
-    value_max: -775.0
-    sampling_function: generate_uniform
-  Jurassic_Middle_bottom: 
-    value: -900.0
-    value_min: -925.0
-    value_max: -875.0
-    sampling_function: generate_uniform
-  Jurassic_Lower_bottom: 
-    value: -1000.0
-    value_min: -1025.0
-    value_max: -975.0
-    sampling_function: generate_uniform
-  Keuper_bottom: 
-    value: -1100.0
-    value_min: -1125.0
-    value_max: -1100.0
-    sampling_function: generate_uniform
-  Buntsandstein_Muschelkalk_bottom:
-    value: -1500.0
-    value_min: -1525.0
-    value_max: -1475.0
-    sampling_function: generate_uniform
-  Zechstein_bottom: 
-    value: -1600.0
-    value_min: -1625.0
-    value_max: -1575.0
-    sampling_function: generate_uniform
-  basement_bottom: 
-    value: -1800.0
-    value_min: -1900.0
-    value_max: -1700.0
-    sampling_function: generate_uniform
+  # optional
+  merge_unit_depth:
+    Quaternary_top:
+      value: 0.0
+      value_min: -10.0
+      value_max: 10.0
+      sampling_function: generate_uniform
+    Quaternary_bottom:
+      value: -50.0
+      value_min: -60.0
+      value_max: -40.0
+      sampling_function: generate_uniform
+    Albian_bottom:
+      value: -100.0
+      value_min: -110.0
+      value_max: -90.0
+      sampling_function: generate_uniform
+    Aptian_bottom:
+      value: -400.0
+      value_min: -415.0
+      value_max: -385.0
+      sampling_function: generate_uniform
+    Host_rock_bottom:
+      value: -525.0
+      value_min: -535.0
+      value_max: -510.0
+      sampling_function: generate_uniform
+    Valanginian_Wealden_bottom:
+      value: -650.0
+      value_min: -675.0
+      value_max: -625.0
+      sampling_function: generate_uniform
+    Jurassic_Upper_bottom:
+      value: -800.0
+      value_min: -825.0
+      value_max: -775.0
+      sampling_function: generate_uniform
+    Jurassic_Middle_bottom:
+      value: -900.0
+      value_min: -925.0
+      value_max: -875.0
+      sampling_function: generate_uniform
+    Jurassic_Lower_bottom:
+      value: -1000.0
+      value_min: -1025.0
+      value_max: -975.0
+      sampling_function: generate_uniform
+    Keuper_bottom:
+      value: -1100.0
+      value_min: -1125.0
+      value_max: -1100.0
+      sampling_function: generate_uniform
+    Buntsandstein_Muschelkalk_bottom:
+      value: -1500.0
+      value_min: -1525.0
+      value_max: -1475.0
+      sampling_function: generate_uniform
+    Zechstein_bottom:
+      value: -1600.0
+      value_min: -1625.0
+      value_max: -1575.0
+      sampling_function: generate_uniform
+    basement_bottom:
+      value: -1800.0
+      value_min: -1900.0
+      value_max: -1700.0
+      sampling_function: generate_uniform
 
-
-nuclide_to_consider:
-  - I-129
+communication_ntd:
+  nuclide_to_consider:
+    - I-129
 
 uncertain_parameters:
   rock_data:
@@ -115,13 +116,13 @@ uncertain_parameters:
     Valanginian_Wealden:
       - I-129
 
-sampling:
+sampling_config:
   sample_size: 4
   sampling_method: sobol
   seed: 21
   save_file_type: HDF5
 
-model_config:
+model:
   project_name: Case1_Claystone_Lower-Saxony
   create_python_bc: True
   python_bc_source_value: 0.0022

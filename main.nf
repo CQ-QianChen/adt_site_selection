@@ -27,7 +27,7 @@ process COMMUNICATION_SDH {
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    val params_yaml
+    val config
     val case_name
     val hash8
 
@@ -35,59 +35,37 @@ process COMMUNICATION_SDH {
     path "rock_data", emit: rock_data
     path "site_data", emit: site_data
     path "geometry", emit: geometry
-    path "params.yaml", emit: params
 
     script:
     """
-    echo "${params_yaml}" > params.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     python -m smart_data_hub.export_data \
-      --config params.yaml \
+      --config config.yaml \
       --path_to_save_rock_yaml rock_data \
       --path_to_save_site_yaml site_data \
       --path_to_save_site_geometry geometry
     """
 }
 
-process SAMPLING {
-    conda "$moduleDir/sampling/environment.yaml"
+process CREATE_DATASTORE {
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    path script
-    val params_yaml
+    val config
     val case_name
-    val hash8
-    path geometry
-    path rock_data
-    path nuclide_sorption_data
-    path nuclide_water_diffusivity_data
-    val sample_size
-    val sampling_method
-    val seed
-    val save_file_type
 
     output:
-    path "sampled_data/*", emit: sampled_data
+    path "params.yaml"
+    val hash8, emit: hash8
 
     script:
+    def case_cfg = config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config']) }
+    hash8 = computeHash8(case_cfg)
     """
-    echo "${params_yaml}" > params.yaml
-
-    mkdir -p sampled_data
-
-    python ${script} \
-      --config params.yaml \
-      --sample_size ${sample_size} \
-      --sampling_method ${sampling_method} \
-      --seed ${seed} \
-      --path_to_geometry_data ${geometry} \
-      --path_to_rock_data ${rock_data} \
-      --path_to_sorption_data ${nuclide_sorption_data} \
-      --path_to_diffusivity_data ${nuclide_water_diffusivity_data} \
-      --path_to_save_sampled_data sampled_data \
-      --save_file_type ${save_file_type}
+    echo "${toYaml(case_cfg)}" > params.yaml
     """
+
 }
 
 process COMMUNICATION_NTD {
@@ -95,7 +73,7 @@ process COMMUNICATION_NTD {
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    val params_yaml
+    val config
     val case_name
     val hash8
     path site_data
@@ -109,10 +87,10 @@ process COMMUNICATION_NTD {
 
     script:
     """
-    echo "${params_yaml}" > params.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     python -m nuctransportdb.export_data \
-      --config params.yaml \
+      --config config.yaml \
       --path_to_site_yaml_file ${site_data}/${site_name}.yaml \
       --path_to_save_sorption_data nuclide_sorption_data \
       --path_to_save_nuclide_species_data nuclide_species_data \
@@ -121,12 +99,50 @@ process COMMUNICATION_NTD {
     """
 }
 
+process SAMPLING {
+    conda "$moduleDir/sampling/environment.yaml"
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+
+    input:
+    path script
+    val uncertain_parameters
+    val sampling_config
+    val case_name
+    val hash8
+    path geometry
+    path rock_data
+    path nuclide_sorption_data
+    path nuclide_water_diffusivity_data
+
+    output:
+    path "sampled_data/*", emit: sampled_data
+
+    script:
+    """
+    echo "${toYaml([uncertain_parameters: uncertain_parameters])}" > config.yaml
+
+    mkdir -p sampled_data
+
+    python ${script} \
+      --config config.yaml \
+      --sample_size ${sampling_config.sample_size} \
+      --sampling_method ${sampling_config.sampling_method} \
+      --seed ${sampling_config.seed} \
+      --path_to_geometry_data ${geometry} \
+      --path_to_rock_data ${rock_data} \
+      --path_to_sorption_data ${nuclide_sorption_data} \
+      --path_to_diffusivity_data ${nuclide_water_diffusivity_data} \
+      --path_to_save_sampled_data sampled_data \
+      --save_file_type ${sampling_config.save_file_type}
+    """
+}
+
 process MODEL {
     conda "$moduleDir/model/environment.yaml"
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    val params_yaml
+    val config
     val case_name
     val hash8
     path rock_data
@@ -137,18 +153,14 @@ process MODEL {
     path nuclide_sorption_data
     path nuclide_water_diffusivity_data
     path sampled_data
-    val n_jobs
-    val parallel
-    val keep_vtu
-    val get_field_component_index
-    val sort_by_index
+    val simulator_config
 
     output:
     path "model_results/*", type: 'any', emit: model_results
 
     script:
     """
-    echo "${params_yaml}" > model_config.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     mkdir -p model_results
 
@@ -161,14 +173,14 @@ process MODEL {
       --species_type_folder_path ${nuclide_species_data} \
       --sorption_data_folder_path ${nuclide_sorption_data} \
       --nuclide_water_diffusivity_folder_path ${nuclide_water_diffusivity_data} \
-      --model_config_path model_config.yaml \
+      --model_config_path config.yaml \
       --sampled_data_file_path ${sampled_data} \
-      --get_field_component_index "${get_field_component_index}" \
-      --sort_by_index ${sort_by_index} \
+      --get_field_component_index "${config.get_field_component_index}" \
+      --sort_by_index ${simulator_config.sort_by_index} \
       --run_mode ensemble \
-      --parallel ${parallel ? 'True' : 'False'} \
-      --n_jobs ${n_jobs} \
-      --keep_vtu ${keep_vtu ? 'True' : 'False'} \
+      --parallel ${simulator_config.parallel ? 'True' : 'False'} \
+      --n_jobs ${simulator_config.n_jobs} \
+      --keep_vtu ${simulator_config.keep_vtu ? 'True' : 'False'} \
       --path_to_save_results_hdf5_file model_results/ensemble_results_with_${sampled_data.baseName}.h5 \
       --save_sampled_data True
 
@@ -178,34 +190,43 @@ process MODEL {
 
 workflow {
     def case_name = file(params.config_file).getBaseName()
-    def cfg = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
-    def case_cfg = cfg.findAll { k, v -> !(k in ['sampling', 'simulator_config']) }
-    def hash8 = computeHash8(case_cfg)
+    def case_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
 
-    COMMUNICATION_SDH(toYaml(case_cfg), case_name, hash8)
+    CREATE_DATASTORE(
+        case_config,
+        case_name
+    )
 
-    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, cfg.site_name)
+    COMMUNICATION_SDH(
+        case_config.communication_sdh,
+        case_name,
+        CREATE_DATASTORE.out.hash8
+    )
 
-    def sampling_cfg = [uncertain_parameters: cfg.uncertain_parameters]
+    COMMUNICATION_NTD(
+        case_config.communication_ntd,
+        case_name,
+        CREATE_DATASTORE.out.hash8,
+        COMMUNICATION_SDH.out.site_data,
+        case_config.communication_sdh.site_name
+    )
+
     SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
-        toYaml(sampling_cfg),
+        case_config.uncertain_parameters,
+        case_config.sampling_config,
         case_name,
-        hash8,
+        CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.geometry,
         COMMUNICATION_SDH.out.rock_data,
         COMMUNICATION_NTD.out.nuclide_sorption_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        cfg.sampling.sample_size,
-        cfg.sampling.sampling_method,
-        cfg.sampling.seed,
-        cfg.sampling.save_file_type
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
     )
 
     MODEL(
-        toYaml(cfg.model_config),
+        case_config.model,
         case_name,
-        hash8,
+        CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.rock_data,
         COMMUNICATION_SDH.out.site_data,
         COMMUNICATION_SDH.out.geometry,
@@ -214,10 +235,6 @@ workflow {
         COMMUNICATION_NTD.out.nuclide_sorption_data,
         COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
         SAMPLING.out.sampled_data,
-        cfg.simulator_config.n_jobs,
-        cfg.simulator_config.parallel,
-        cfg.simulator_config.keep_vtu,
-        cfg.model_config.get_field_component_index,
-        cfg.simulator_config.sort_by_index
+        case_config.simulator_config
     )
 }
