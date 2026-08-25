@@ -27,7 +27,7 @@ process COMMUNICATION_SDH {
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    val params_yaml
+    val config
     val case_name
     val hash8
 
@@ -35,17 +35,65 @@ process COMMUNICATION_SDH {
     path "rock_data", emit: rock_data
     path "site_data", emit: site_data
     path "geometry", emit: geometry
-    path "params.yaml", emit: params
 
     script:
     """
-    echo "${params_yaml}" > params.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     python -m smart_data_hub.export_data \
-      --config params.yaml \
+      --config config.yaml \
       --path_to_save_rock_yaml rock_data \
       --path_to_save_site_yaml site_data \
       --path_to_save_site_geometry geometry
+    """
+}
+
+process CREATE_DATASTORE {
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+
+    input:
+    val config
+    val case_name
+    val hash8
+
+    output:
+    path "params.yaml"
+
+    script:
+    """
+    echo "${toYaml(config)}" > params.yaml
+    """
+
+}
+
+process COMMUNICATION_NTD {
+    conda "$moduleDir/communication_ntd/environment.yaml"
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+
+    input:
+    val config
+    val case_name
+    val hash8
+    path site_data
+    val site_name
+
+    output:
+    path "nuclide_sorption_data", emit: nuclide_sorption_data
+    path "nuclide_species_data", emit: nuclide_species_data
+    path "nuclide_water_diffusivity_data", emit: nuclide_water_diffusivity_data
+    path "nuclide_emitted_energy_data", emit: nuclide_emitted_energy_data
+
+    script:
+    """
+    echo "${toYaml(config)}" > config.yaml
+
+    python -m nuctransportdb.export_data \
+      --config config.yaml \
+      --path_to_site_yaml_file ${site_data}/${site_name}.yaml \
+      --path_to_save_sorption_data nuclide_sorption_data \
+      --path_to_save_nuclide_species_data nuclide_species_data \
+      --path_to_save_nuclide_water_diffusivity_data nuclide_water_diffusivity_data \
+      --path_to_save_nuclide_emitted_energy_data nuclide_emitted_energy_data
     """
 }
 
@@ -55,7 +103,7 @@ process SAMPLING {
 
     input:
     path script
-    val params_yaml
+    val config
     val case_name
     val hash8
     path geometry
@@ -72,12 +120,12 @@ process SAMPLING {
 
     script:
     """
-    echo "${params_yaml}" > params.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     mkdir -p sampled_data
 
     python ${script} \
-      --config params.yaml \
+      --config config.yaml \
       --sample_size ${sample_size} \
       --sampling_method ${sampling_method} \
       --seed ${seed} \
@@ -90,43 +138,13 @@ process SAMPLING {
     """
 }
 
-process COMMUNICATION_NTD {
-    conda "$moduleDir/communication_ntd/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
-
-    input:
-    val params_yaml
-    val case_name
-    val hash8
-    path site_data
-    val site_name
-
-    output:
-    path "nuclide_sorption_data", emit: nuclide_sorption_data
-    path "nuclide_species_data", emit: nuclide_species_data
-    path "nuclide_water_diffusivity_data", emit: nuclide_water_diffusivity_data
-    path "nuclide_emitted_energy_data", emit: nuclide_emitted_energy_data
-
-    script:
-    """
-    echo "${params_yaml}" > params.yaml
-
-    python -m nuctransportdb.export_data \
-      --config params.yaml \
-      --path_to_site_yaml_file ${site_data}/${site_name}.yaml \
-      --path_to_save_sorption_data nuclide_sorption_data \
-      --path_to_save_nuclide_species_data nuclide_species_data \
-      --path_to_save_nuclide_water_diffusivity_data nuclide_water_diffusivity_data \
-      --path_to_save_nuclide_emitted_energy_data nuclide_emitted_energy_data
-    """
-}
 
 process MODEL {
     conda "$moduleDir/model/environment.yaml"
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
 
     input:
-    val params_yaml
+    val config
     val case_name
     val hash8
     path rock_data
@@ -148,7 +166,7 @@ process MODEL {
 
     script:
     """
-    echo "${params_yaml}" > model_config.yaml
+    echo "${toYaml(config)}" > config.yaml
 
     mkdir -p model_results
 
@@ -161,7 +179,7 @@ process MODEL {
       --species_type_folder_path ${nuclide_species_data} \
       --sorption_data_folder_path ${nuclide_sorption_data} \
       --nuclide_water_diffusivity_folder_path ${nuclide_water_diffusivity_data} \
-      --model_config_path model_config.yaml \
+      --model_config_path config.yaml \
       --sampled_data_file_path ${sampled_data} \
       --get_field_component_index "${get_field_component_index}" \
       --sort_by_index ${sort_by_index} \
@@ -182,14 +200,16 @@ workflow {
     def case_cfg = cfg.findAll { k, v -> !(k in ['sampling', 'simulator_config']) }
     def hash8 = computeHash8(case_cfg)
 
-    COMMUNICATION_SDH(toYaml(case_cfg), case_name, hash8)
+    CREATE_DATASTORE(case_cfg, case_name, hash8)
 
-    COMMUNICATION_NTD(toYaml(case_cfg), case_name, hash8, COMMUNICATION_SDH.out.site_data, cfg.site_name)
+    COMMUNICATION_SDH(case_cfg, case_name, hash8)
+
+    COMMUNICATION_NTD(case_cfg, case_name, hash8, COMMUNICATION_SDH.out.site_data, cfg.site_name)
 
     def sampling_cfg = [uncertain_parameters: cfg.uncertain_parameters]
     SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
-        toYaml(sampling_cfg),
+        sampling_cfg,
         case_name,
         hash8,
         COMMUNICATION_SDH.out.geometry,
@@ -203,7 +223,7 @@ workflow {
     )
 
     MODEL(
-        toYaml(cfg.model_config),
+        cfg.model_config,
         case_name,
         hash8,
         COMMUNICATION_SDH.out.rock_data,
