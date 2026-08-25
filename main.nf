@@ -41,7 +41,7 @@ process COMMUNICATION_SDH {
     echo "${toYaml(config)}" > config.yaml
 
     python -m smart_data_hub.export_data \
-      --config config.yaml \
+      --config params.yaml \
       --path_to_save_rock_yaml rock_data \
       --path_to_save_site_yaml site_data \
       --path_to_save_site_geometry geometry
