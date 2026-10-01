@@ -188,9 +188,22 @@ process MODEL {
     """
 }
 
+def defaultsConfig() {
+    return [
+        communication_sdh: [
+            sampling_functions_by_property: [
+                electrical_resistivity: 'generate_lognorm',
+                intrinsic_permeability: 'generate_lognorm'
+            ]
+        ]
+    ]
+}
+
 workflow {
     def case_name = file(params.config_file).getBaseName()
     def case_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+
+    case_config.communication_sdh = defaultsConfig().communication_sdh + case_config.communication_sdh
 
     CREATE_DATASTORE(
         case_config,

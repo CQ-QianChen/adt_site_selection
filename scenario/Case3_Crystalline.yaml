@@ -6,11 +6,6 @@ communication_sdh:
       - Baden-Wuerttemberg
 
   # optional
-  sampling_functions_by_property: # we support generate_lognorm, generate_PERT, generate_truncnorm, generate_uniform, generate_norm
-    electrical_resistivity: generate_lognorm
-    intrinsic_permeability: generate_lognorm
-
-  # optional
   merge_unit_rock_prop:
     Quaternary: [Quaternary]
     Muschelkalk: [Muschelkalk]
