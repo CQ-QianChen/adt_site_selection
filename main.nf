@@ -177,12 +177,12 @@ process MODEL {
       --sampled_data_file_path ${sampled_data} \
       --get_field_component_index "${config.get_field_component_index}" \
       --sort_by_index ${simulator_config.sort_by_index} \
-      --run_mode ensemble \
+      --run_mode ${simulator_config.run_mode} \
       --parallel ${simulator_config.parallel ? 'True' : 'False'} \
       --n_jobs ${simulator_config.n_jobs} \
       --keep_vtu ${simulator_config.keep_vtu ? 'True' : 'False'} \
       --path_to_save_results_hdf5_file model_results/ensemble_results_with_${sampled_data.baseName}.h5 \
-      --save_sampled_data True
+      --save_sampled_data ${simulator_config.save_sampled_data}
 
     rmdir model_results/${sampled_data.baseName} 2>/dev/null || true
     """
@@ -244,7 +244,9 @@ def defaultsConfig() {
             get_field_component_index: [0, 1, 2]
         ],
         simulator_config: [
-            sort_by_index: 2
+            sort_by_index: 2,
+            run_mode: 'ensemble',
+            save_sampled_data: 'True'
         ]
     ]
 }
