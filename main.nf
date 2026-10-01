@@ -195,6 +195,9 @@ def defaultsConfig() {
                 electrical_resistivity: 'generate_lognorm',
                 intrinsic_permeability: 'generate_lognorm'
             ]
+        ],
+        sampling_config: [
+            save_file_type: 'HDF5'
         ]
     ]
 }
@@ -224,10 +227,22 @@ workflow {
         case_config.communication_sdh.site_name
     )
 
-    SAMPLING(
+    def training_samples = SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
         case_config.uncertain_parameters,
-        case_config.sampling_config,
+        defaultsConfig().sampling_config + case_config.sampling_config.training,
+        case_name,
+        CREATE_DATASTORE.out.hash8,
+        COMMUNICATION_SDH.out.geometry,
+        COMMUNICATION_SDH.out.rock_data,
+        COMMUNICATION_NTD.out.nuclide_sorption_data,
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
+    )
+
+    def validation_samples = SAMPLING(
+        file("$moduleDir/sampling/sampling_func.py"),
+        case_config.uncertain_parameters,
+        defaultsConfig().sampling_config + case_config.sampling_config.validation,
         case_name,
         CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.geometry,
@@ -247,7 +262,22 @@ workflow {
         COMMUNICATION_NTD.out.nuclide_species_data,
         COMMUNICATION_NTD.out.nuclide_sorption_data,
         COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        SAMPLING.out.sampled_data,
+        training_samples.sampled_data,
+        case_config.simulator_config
+    )
+
+    MODEL(
+        case_config.model,
+        case_name,
+        CREATE_DATASTORE.out.hash8,
+        COMMUNICATION_SDH.out.rock_data,
+        COMMUNICATION_SDH.out.site_data,
+        COMMUNICATION_SDH.out.geometry,
+        COMMUNICATION_NTD.out.nuclide_emitted_energy_data,
+        COMMUNICATION_NTD.out.nuclide_species_data,
+        COMMUNICATION_NTD.out.nuclide_sorption_data,
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+        validation_samples.sampled_data,
         case_config.simulator_config
     )
 }
