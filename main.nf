@@ -198,6 +198,53 @@ def defaultsConfig() {
         ],
         sampling_config: [
             save_file_type: 'HDF5'
+        ],
+        model: [
+            create_meshes: true,
+            mesh_dimension: 1,
+            quantity_of_interests: ['concentration', 'Flux'],
+            process_variables: ['pressure', 'concentration'],
+            secondary_variables: ['Flux'],
+            sim_setup: [
+                timeloop: [
+                    processes: [
+                        nonlinear_solver_name: 'basic_picard',
+                        convergence_type: 'PerComponentDeltaX',
+                        norm_type: 'NORM2',
+                        time_discretization: 'BackwardEuler',
+                        time_stepping: [
+                            type: 'FixedTimeStepping',
+                            t_initial: 0.0,
+                            t_end: 31557600000000.0,
+                            time_step: [31557600.0, 315576000.0, 3155760000.0, 31557600000.0, 315576000000.0],
+                            repeat: [100, 90, 90, 90, 90]
+                        ]
+                    ],
+                    output: [
+                        repeat: ['10', '9', '9', '9', '9'],
+                        each_steps: ['10', '10', '10', '10', '10']
+                    ]
+                ],
+                non_linear_solver: [
+                    name: 'basic_picard',
+                    type: 'Picard',
+                    max_iter: '10',
+                    linear_solver: 'general_linear_solver'
+                ],
+                linear_solver: [
+                    name: ['general_linear_solver', 'general_linear_solver', 'general_linear_solver'],
+                    kind: ['lis', 'eigen', 'petsc'],
+                    prefix: [null, null, 'hc'],
+                    solver_type: ['cg', 'SparseLU', 'bcgs'],
+                    precon_type: ['jacobi', 'ILUT', 'bjacobi'],
+                    max_iteration_step: ['20000', '10000', '20000'],
+                    error_tolerance: [1e-16, 1e-14, 1e-8]
+                ]
+            ],
+            get_field_component_index: [0, 1, 2]
+        ],
+        simulator_config: [
+            sort_by_index: 2
         ]
     ]
 }
@@ -207,7 +254,11 @@ workflow {
     def case_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
 
     case_config.communication_sdh = defaultsConfig().communication_sdh + case_config.communication_sdh
-
+    case_config.sampling_config.training = defaultsConfig().sampling_config + case_config.sampling_config.training
+    case_config.sampling_config.validation = defaultsConfig().sampling_config + case_config.sampling_config.validation
+    case_config.model = defaultsConfig().model + case_config.model + [project_name: case_name]
+    case_config.simulator_config = defaultsConfig().simulator_config + case_config.simulator_config
+    
     CREATE_DATASTORE(
         case_config,
         case_name
@@ -230,7 +281,7 @@ workflow {
     def training_samples = SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
         case_config.uncertain_parameters,
-        defaultsConfig().sampling_config + case_config.sampling_config.training,
+        case_config.sampling_config.training,
         case_name,
         CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.geometry,
@@ -242,7 +293,7 @@ workflow {
     def validation_samples = SAMPLING(
         file("$moduleDir/sampling/sampling_func.py"),
         case_config.uncertain_parameters,
-        defaultsConfig().sampling_config + case_config.sampling_config.validation,
+        case_config.sampling_config.validation,
         case_name,
         CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.geometry,
