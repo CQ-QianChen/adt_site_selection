@@ -1,7 +1,7 @@
 """
 runner.py - Train a BayesValidRox surrogate on OGS results.
 """
-import joblib
+import hickle
 import json
 import yaml
 from pathlib import Path
@@ -118,7 +118,7 @@ def train_surrogate(
     qoi_floor=None,      # numerical noise floor threshold
     z_range=None,        # (top, bottom) depth window or list of intervals
     z_min_variance=None, # drop depths that do not vary across samples
-    engine_path=None,    # where to save engine.pkl (Experiment.engine_path)
+    engine_path=None,    # where to save engine.hkl (Experiment.engine_path)
 ):
     """Load the data, set up the input space and train the surrogate.
 
@@ -279,11 +279,13 @@ def train_surrogate(
 
     # 7. Save
     if engine_path is None:
-        raise ValueError("engine_path is required: provide the destination path for engine.pkl.")
+        raise ValueError("engine_path is required: provide the destination path for engine.hkl.")
     engine_file = Path(engine_path)
     output_path = engine_file.parent
     output_path.mkdir(parents=True, exist_ok=True)
-    joblib.dump(engine, engine_file)
+    # TODO: hickle currently stores the Engine as one pickled blob inside the HDF5 file, so the
+    # contents are opaque. Save plain arrays/dicts (PCE coefficients, multi-indices, input specs) instead.
+    hickle.dump(engine, engine_file, mode='w', compression='gzip', compression_opts=4)
 
     # 8. Validation metrics
     val_metrics = None

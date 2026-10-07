@@ -142,8 +142,8 @@ Everything is written to `--engine_folder`:
 
 | File | Content |
 |---|---|
-| `engine.pkl` | The trained surrogate (a BayesValidRox `Engine`, saved with joblib). |
-| `engine.pkl.manifest.json` | Case, engine name, type, settings, quantity of interest, resolved depths, number of training samples, and the file names of the training and validation data. |
+| `engine.hkl` | The trained surrogate (a BayesValidRox `Engine`, saved with hickle and gzip). The `Engine` is stored as one pickled object inside the HDF5 file, so its contents cannot be inspected with HDF5 tools yet. Load it with `hickle.load`. |
+| `engine.hkl.manifest.json` | Case, engine name, type, settings, quantity of interest, resolved depths, number of training samples, and the file names of the training and validation data. |
 | `validation_metrics.json` | Validation metrics per output depth and time step: `rmse`, `mse`, `nse`, `r2`, `pearson_r`, `mean_error`, `std_error`, `norm_error`, `P95`, `DS`. Time steps with no signal are `NaN`. Only written when validation data is given. |
 | `training_summary.txt` | Method, number of training points, training time and the validation metrics averaged over the output locations. |
 

@@ -133,7 +133,7 @@ class Experiment:
     # Optional explicit locations; when unset the old workflow_dir layout is used.
     parameters_file: Path | None = None    # yaml with uncertain_parameters
     case_folder: Path | None = None        # has rock_data/, geometry/, nuclide_water_diffusivity_data/
-    engine_folder: Path | None = None      # engine.pkl is written straight into this folder
+    engine_folder: Path | None = None      # engine.hkl is written straight into this folder
 
     # ---- loading ---------------------------------------------------------- #
     def _req(self, key):

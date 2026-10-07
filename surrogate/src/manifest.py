@@ -2,14 +2,14 @@
 manifest.py - The JSON manifest written next to output files, and the engine
 registry filenames.
 
-The surrogate box writes one next to engine.pkl; the decision-support box reads
+The surrogate box writes one next to engine.hkl; the decision-support box reads
 it to get the QoI, case and depths of an engine.
 """
 import json
 from pathlib import Path
 
 _MANIFEST_SUFFIX = ".manifest.json"
-ENGINE_FILENAME = "engine.pkl"
+ENGINE_FILENAME = "engine.hkl"
 
 
 def manifest_path_for(target_file):

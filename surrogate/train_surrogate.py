@@ -80,7 +80,7 @@ def main():
         verbose=True,
     )
 
-    # Only now that engine.pkl exists do we write its manifest
+    # Only now that engine.hkl exists do we write its manifest
     exp.write_manifest(exp.engine_path, stage="surrogate", extra={
         "kind": "engine",
         "case": exp.case,
