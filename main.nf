@@ -109,6 +109,7 @@ workflow {
     case_config.sampling_config.validation = defaultsConfig().sampling_config + case_config.sampling_config.validation
     case_config.model = defaultsConfig().model + case_config.model + [project_name: case_name]
     case_config.simulator_config = defaultsConfig().simulator_config + case_config.simulator_config
+    case_config.surrogate = defaultsConfig().surrogate + case_config.surrogate
     
     CREATE_DATASTORE(
         case_config,
@@ -181,5 +182,19 @@ workflow {
         COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
         SAMPLING_VALIDATION.out.sampled_data,
         case_config.simulator_config
+    )
+
+    SURROGATE(
+        case_config.surrogate,
+        case_config.uncertain_parameters,
+        case_name,
+        CREATE_DATASTORE.out.hash8,
+        case_config.sampling_config.training,
+        case_config.sampling_config.validation,
+        COMMUNICATION_SDH.out.geometry,
+        COMMUNICATION_SDH.out.rock_data,
+        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+        MODEL_TRAINING.out.model_results,
+        MODEL_VALIDATION.out.model_results
     )
 }

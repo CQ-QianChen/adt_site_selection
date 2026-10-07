@@ -1,0 +1,16 @@
+figure.titlesize : 30
+axes.titlesize : 30
+axes.labelsize : 30
+axes.linewidth : 3
+axes.grid : True
+lines.linewidth : 3
+lines.markersize : 10
+xtick.labelsize : 30
+ytick.labelsize : 30
+legend.fontsize : 30
+font.family : serif
+font.serif : Arial
+font.size : 30
+text.usetex : True
+grid.linestyle : -
+figure.figsize : 24, 16

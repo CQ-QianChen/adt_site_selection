@@ -12,7 +12,7 @@ process CREATE_DATASTORE {
     val hash8, emit: hash8
 
     script:
-    def case_cfg = config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config']) }
+    def case_cfg = config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config', 'surrogate']) }
     hash8 = computeHash8(case_cfg)
     """
     echo "${toYaml(case_cfg)}" > params.yaml

@@ -1,0 +1,26 @@
+name: surrogate
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - corner>=2.2.3             # bayesvalidrox
+  - emcee>=3.1.6              # bayesvalidrox
+  - joblib>=1.5.3             # bayesvalidrox
+  - multiprocess>=0.70.19     # bayesvalidrox
+  - numpy>=2.0.0              # bayesvalidrox
+  - scikit-learn>=1.8.0       # bayesvalidrox
+  - scipy                     # bayesvalidrox
+  - seaborn>=0.13.2           # bayesvalidrox
+  - pandas                    # bayesvalidrox
+  - matplotlib                # bayesvalidrox
+  - tqdm                      # bayesvalidrox
+  - h5py                      # bayesvalidrox
+  - gpytorch>=1.15.2
+  - pytorch-cpu>=2.11.0
+  - pyyaml
+  - hickle
+  - pip:
+      # not on conda-forge, or older there than the version their code needs
+      - chaospy>=4.3.21       # bayesvalidrox
+      - umbridge>=1.2.4       # bayesvalidrox

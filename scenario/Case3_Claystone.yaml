@@ -152,3 +152,11 @@ simulator_config:
   n_jobs: 4
   parallel: True
   keep_vtu: False
+
+surrogate:
+  type: pce
+  output_qoi: I-129Flux
+  z_interest:
+    - Host_rock_top
+    - Host_rock_bottom
+  t_interest: null
