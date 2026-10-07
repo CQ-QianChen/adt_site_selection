@@ -160,3 +160,7 @@ surrogate:
     - [null, null]
   t_interest: [1.0e+05, 5.0e+05, 1.0e+06]
   qoi_floor: 1.0e-12
+  transform: null
+  pce_opts:
+    q_norm: 0.5
+    degree: [3, 4, 5]

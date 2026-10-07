@@ -147,3 +147,8 @@ surrogate:
     - Host_rock_top
     - Host_rock_bottom
   t_interest: null
+  qoi_floor: 1.0e-20
+  transform: null
+  pce_opts:
+    q_norm: 1.0
+    degree: [3, 5, 6]

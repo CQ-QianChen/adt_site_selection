@@ -67,17 +67,13 @@ def defaultsConfig() {
             run_mode: 'ensemble',
             save_sampled_data: 'True'
         ],
-        // type, output_qoi, z_interest and t_interest are per-case and have no default
+        // type, output_qoi, z_interest, t_interest, qoi_floor, transform, pce_opts.q_norm and pce_opts.degree are per-case and have no default
         surrogate: [
-            qoi_floor: 1.0e-20,
             n_init: null,
             parallel: true,
-            transform: null,
             pce_opts: [
                 type: 'aPCE',
                 reg_method: 'FastARDExtended',
-                q_norm: 0.6,
-                degree: [3, 4, 5],
                 dim_red_method: 'no',
                 bootstrap_method: 'fast',
                 n_bootstrap_itrs: 1,
@@ -109,7 +105,11 @@ workflow {
     case_config.sampling_config.validation = defaultsConfig().sampling_config + case_config.sampling_config.validation
     case_config.model = defaultsConfig().model + case_config.model + [project_name: case_name]
     case_config.simulator_config = defaultsConfig().simulator_config + case_config.simulator_config
-    case_config.surrogate = defaultsConfig().surrogate + case_config.surrogate
+    def surrogate_defaults = defaultsConfig().surrogate
+    case_config.surrogate = surrogate_defaults + case_config.surrogate + [
+        pce_opts: surrogate_defaults.pce_opts + (case_config.surrogate.pce_opts ?: [:]),
+        gp_opts: surrogate_defaults.gp_opts + (case_config.surrogate.gp_opts ?: [:])
+    ]
     
     CREATE_DATASTORE(
         case_config,
