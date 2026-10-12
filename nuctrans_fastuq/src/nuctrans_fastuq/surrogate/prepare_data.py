@@ -217,8 +217,8 @@ def get_output_names(z_interest=None, t_interest=None, output_qoi="I-129"):
 
 def create_input_space(uncertain_parameters, case_dir):
     """BayesValidRox Input with the marginals read from the case folders."""
-    from .bayesvalidrox import Input
-    from .bayesvalidrox.surrogate_models.input_space import InputSpace
+    from ..bayesvalidrox import Input
+    from ..bayesvalidrox.surrogate_models.input_space import InputSpace
 
     inputs = Input()
 

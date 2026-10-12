@@ -27,7 +27,7 @@ import yaml
 # repo root
 WORKFLOW_DIR = Path(__file__).resolve().parents[1]
 
-# manifest format and registry names are shared with decision_support_uq
+# manifest format and registry names are shared with the uq package
 from .manifest import (  # noqa: F401  (re-exported)
     ENGINE_FILENAME,
     manifest_path_for,
@@ -56,7 +56,7 @@ def _resolve_surrogate_type(raw_type: str) -> str:
 def _import_bvr():
     """Import bayesvalidrox from the local submodule or the installed package."""
     try:
-        from . import bayesvalidrox as bvr
+        from .. import bayesvalidrox as bvr
         return bvr
     except (ImportError, ModuleNotFoundError):
         import bayesvalidrox as bvr
@@ -133,7 +133,7 @@ class Experiment:
     # Optional explicit locations; when unset the old workflow_dir layout is used.
     parameters_file: Path | None = None    # yaml with uncertain_parameters
     case_folder: Path | None = None        # has rock_data/, geometry/, nuclide_water_diffusivity_data/
-    engine_folder: Path | None = None      # engine.hkl is written straight into this folder
+    engine_folder: Path | None = None      # engine.h5 is written straight into this folder
 
     # ---- loading ---------------------------------------------------------- #
     def _req(self, key):

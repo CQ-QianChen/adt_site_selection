@@ -1449,40 +1449,35 @@ class PCE(MetaModel):
             S1_cube = np.zeros((n_boot, n_params, n_meas_points))
             ST_cube = np.zeros((n_boot, n_params, n_meas_points))
 
-            # We must iterate through time points because the basis is dynamic
+            # The basis is dynamic: it differs per time point, and (bootstrap_method
+            # "normal") per bootstrap iteration, so every (t, bootstrap) uses its own.
             for t_i in range(n_meas_points):
                 t_str = f"y_{t_i+1}"
-                
-                # 1. Get the basis matrix for THIS specific time point
-                # Assuming basis is consistent across bootstrap iterations for the same t_i
-                basis_matrix = np.array(self._basis_dict[first_b_key][out_key][t_str])
-                n_coeffs = basis_matrix.shape[0]
 
-                # 2. Extract Coefficients for all bootstrap samples at this time point
-                # Shape: (n_boot, n_coeffs)
-                C_t = np.zeros((n_boot, n_coeffs))
                 for b_i in range(n_boot):
                     b_str = f"b_{b_i+1}"
-                    C_t[b_i, :] = self._coeffs_dict[b_str][out_key][t_str]
 
-                # 3. Calculate Total Variance for this time point (Denominator)
-                # Skip index 0 (intercept)
-                total_var_t = np.sum(np.square(C_t[:, 1:]), axis=1)
-                total_var_t[total_var_t == 0] = np.nan 
+                    # 1. Basis matrix and coefficients for THIS time point and bootstrap
+                    basis_matrix = np.array(self._basis_dict[b_str][out_key][t_str])
+                    coeffs = np.asarray(self._coeffs_dict[b_str][out_key][t_str])
 
-                # 4. Compute Indices per parameter for this time point
-                for p_idx, p_name in enumerate(self.par_names):
-                    # First Order Mask: Interaction order is 1 AND parameter is present
-                    s1_mask = (np.sum(basis_matrix > 0, axis=1) == 1) & (basis_matrix[:, p_idx] > 0)
-                    
-                    # Total Order Mask: Parameter is involved in the term
-                    st_mask = (basis_matrix[:, p_idx] > 0)
+                    # 2. Total variance (denominator), skipping index 0 (intercept)
+                    total_var = np.sum(np.square(coeffs[1:]))
+                    if total_var == 0:
+                        total_var = np.nan
 
-                    # Sum squares of coeffs and normalize across the bootstrap axis
-                    S1_cube[:, p_idx, t_i] = np.sum(np.square(C_t[:, s1_mask]), axis=1) / total_var_t
-                    ST_cube[:, p_idx, t_i] = np.sum(np.square(C_t[:, st_mask]), axis=1) / total_var_t
+                    # 3. Indices per parameter
+                    for p_idx, p_name in enumerate(self.par_names):
+                        # First Order Mask: Interaction order is 1 AND parameter is present
+                        s1_mask = (np.sum(basis_matrix > 0, axis=1) == 1) & (basis_matrix[:, p_idx] > 0)
 
-            # 5. Reformat into the requested dictionary structure
+                        # Total Order Mask: Parameter is involved in the term
+                        st_mask = (basis_matrix[:, p_idx] > 0)
+
+                        S1_cube[b_i, p_idx, t_i] = np.sum(np.square(coeffs[s1_mask])) / total_var
+                        ST_cube[b_i, p_idx, t_i] = np.sum(np.square(coeffs[st_mask])) / total_var
+
+            # 4. Reformat into the requested dictionary structure
             s1_map = {p_name: S1_cube[:, i, :] for i, p_name in enumerate(self.par_names)}
             st_map = {p_name: ST_cube[:, i, :] for i, p_name in enumerate(self.par_names)}
             

@@ -32,7 +32,7 @@ process SURROGATE {
     echo "${toYaml(config)}" > config.yaml
     echo "${toYaml([uncertain_parameters: uncertain_parameters])}" > uncertain_parameters.yaml
 
-    python $projectDir/surrogate/train_surrogate.py \
+    python -m nuctrans_uq.surrogate.train_surrogate \
       --config config.yaml \
       --case_name ${case_name} \
       --uncertain_parameters uncertain_parameters.yaml \

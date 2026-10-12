@@ -2,7 +2,7 @@
 Trains a surrogate on the model box's output, validates it right away, and
 saves it together with its validation metrics.
 
-    python train_surrogate.py --config config.yaml --case_name Case3_Claystone \
+    python -m nuctrans_fastuq.surrogate.train_surrogate --config config.yaml --case_name Case3_Claystone \
         --uncertain_parameters uncertain_parameters.yaml \
         --training_data train.h5 --validation_data val.h5 \
         --case_folder . --engine_folder surrogate_models/engine_pce_3f9a1c2e
@@ -14,10 +14,8 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from src.experiment import Experiment
-from src.runner import train_surrogate
+from .experiment import Experiment
+from .runner import train_surrogate
 
 
 def parse_args():
@@ -77,10 +75,12 @@ def main():
         z_range=exp.z_range,
         z_min_variance=exp.z_min_variance,
         engine_path=exp.engine_path,
+        case=exp.case,
+        engine_settings=exp.surrogate_specs(),
         verbose=True,
     )
 
-    # Only now that engine.hkl exists do we write its manifest
+    # Only now that engine.h5 exists do we write its manifest
     exp.write_manifest(exp.engine_path, stage="surrogate", extra={
         "kind": "engine",
         "case": exp.case,

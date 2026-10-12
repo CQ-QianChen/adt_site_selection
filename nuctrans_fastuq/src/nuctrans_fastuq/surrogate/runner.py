@@ -1,7 +1,6 @@
 """
 runner.py - Train a BayesValidRox surrogate on OGS results.
 """
-import hickle
 import json
 import yaml
 from pathlib import Path
@@ -12,10 +11,11 @@ import time
 from . import prepare_data
 from .scaling import fit_scaling, scale_data, descale_data, descale_std
 from .validation import validation_error
+from .engine_io import save_engine
 
 from .data_io import load_and_extract_data
 
-from .bayesvalidrox import (PyLinkForwardModel, ExpDesigns, Engine)
+from ..bayesvalidrox import (PyLinkForwardModel, ExpDesigns, Engine)
 
 
 def _get_unique_path(base_path):
@@ -118,7 +118,9 @@ def train_surrogate(
     qoi_floor=None,      # numerical noise floor threshold
     z_range=None,        # (top, bottom) depth window or list of intervals
     z_min_variance=None, # drop depths that do not vary across samples
-    engine_path=None,    # where to save engine.hkl (Experiment.engine_path)
+    engine_path=None,    # where to save engine.h5 (Experiment.engine_path)
+    case=None,           # case name, stored in the engine file
+    engine_settings=None,  # settings that define the engine, stored in the engine file
 ):
     """Load the data, set up the input space and train the surrogate.
 
@@ -279,13 +281,12 @@ def train_surrogate(
 
     # 7. Save
     if engine_path is None:
-        raise ValueError("engine_path is required: provide the destination path for engine.hkl.")
+        raise ValueError("engine_path is required: provide the destination path for engine.h5.")
     engine_file = Path(engine_path)
     output_path = engine_file.parent
     output_path.mkdir(parents=True, exist_ok=True)
-    # TODO: hickle currently stores the Engine as one pickled blob inside the HDF5 file, so the
-    # contents are opaque. Save plain arrays/dicts (PCE coefficients, multi-indices, input specs) instead.
-    hickle.dump(engine, engine_file, mode='w', compression='gzip', compression_opts=4)
+    save_engine(engine, engine_file, case=case, engine_name=output_path.name,
+                output_qoi=output_qoi, settings=engine_settings)
 
     # 8. Validation metrics
     val_metrics = None
