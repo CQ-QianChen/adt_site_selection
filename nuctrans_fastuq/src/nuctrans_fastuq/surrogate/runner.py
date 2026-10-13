@@ -121,6 +121,7 @@ def train_surrogate(
     engine_path=None,    # where to save engine.h5 (Experiment.engine_path)
     case=None,           # case name, stored in the engine file
     engine_settings=None,  # settings that define the engine, stored in the engine file
+    seed=None,           # seeds the random draws that set the input moments and bounds
 ):
     """Load the data, set up the input space and train the surrogate.
 
@@ -133,6 +134,9 @@ def train_surrogate(
             "rock_data/, geometry/ and the nuclide_*_data/ folders."
         )
     case_dir = Path(case_dir)
+    if seed is None:
+        raise ValueError("seed is required: the input moments and bounds are drawn at random.")
+    np.random.seed(seed)  # chaospy draws from the global numpy generator
 
     # 1. Load the sampling config (which parameters are uncertain)
     with open(parameters_path, "r") as f:

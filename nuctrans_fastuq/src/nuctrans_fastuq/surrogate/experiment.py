@@ -410,6 +410,11 @@ class Experiment:
         return int(n) if n is not None else None
 
     @property
+    def seed(self):
+        """Seed of the random draws in the training (input moments and bounds)."""
+        return int(self.surrogate["seed"])
+
+    @property
     def surrogate_type(self):
         """One of 'pce', 'gpe', 'gpe_torch', 'pce_gpe'."""
         stype = _resolve_surrogate_type(self.surrogate.get("type", "pce"))
@@ -592,6 +597,7 @@ class Experiment:
             "transform": self.transform,
             "qoi_floor": self.qoi_floor,
             "n_init": self.n_init,
+            "seed": self.seed,
             "training_data": self.training_path.name,
         }
         if st in ("gpe", "gpe_torch"):
