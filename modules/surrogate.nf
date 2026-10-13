@@ -1,4 +1,4 @@
-include { toYaml; computeHash8 } from './utils.nf'
+include { toYaml; engineName } from './utils.nf'
 
 process SURROGATE {
     conda "$projectDir/surrogate/environment.yaml"
@@ -21,18 +21,12 @@ process SURROGATE {
     path "surrogate_models", emit: surrogate_models
 
     script:
-    // surrogate id: its own settings plus the training and validation samples it sees
-    def surrogate_hash8 = computeHash8([
-        surrogate: config,
-        training: training_sampling_config,
-        validation: validation_sampling_config
-    ])
-    def engine_name = "engine_${config.type.toLowerCase()}_${surrogate_hash8}"
+    def engine_name = engineName(config, training_sampling_config, validation_sampling_config)
     """
     echo "${toYaml(config)}" > config.yaml
     echo "${toYaml([uncertain_parameters: uncertain_parameters])}" > uncertain_parameters.yaml
 
-    python -m nuctrans_uq.surrogate.train_surrogate \
+    python -m nuctrans_fastuq.surrogate.train_surrogate \
       --config config.yaml \
       --case_name ${case_name} \
       --uncertain_parameters uncertain_parameters.yaml \

@@ -6,6 +6,8 @@ include { COMMUNICATION_NTD } from './modules/communication_ntd.nf'
 include { SAMPLING as SAMPLING_TRAINING; SAMPLING as SAMPLING_VALIDATION } from './modules/sampling.nf'
 include { MODEL as MODEL_TRAINING; MODEL as MODEL_VALIDATION } from './modules/model.nf'
 include { SURROGATE } from './modules/surrogate.nf'
+include { SENSITIVITY } from './modules/sensitivity.nf'
+include { engineName; checkKeys } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -62,6 +64,10 @@ def defaultsConfig() {
             ],
             get_field_component_index: [0, 1, 2]
         ],
+        uq: [
+            sensitivity: false,
+            sensitivity_opts: [:]
+        ],
         simulator_config: [
             sort_by_index: 2,
             run_mode: 'ensemble',
@@ -105,6 +111,8 @@ workflow {
     case_config.sampling_config.validation = defaultsConfig().sampling_config + case_config.sampling_config.validation
     case_config.model = defaultsConfig().model + case_config.model + [project_name: case_name]
     case_config.simulator_config = defaultsConfig().simulator_config + case_config.simulator_config
+    checkKeys(case_config.uq ?: [:], defaultsConfig().uq, 'uq')
+    case_config.uq = defaultsConfig().uq + (case_config.uq ?: [:])
     def surrogate_defaults = defaultsConfig().surrogate
     case_config.surrogate = surrogate_defaults + case_config.surrogate + [
         pce_opts: surrogate_defaults.pce_opts + (case_config.surrogate.pce_opts ?: [:]),
@@ -197,4 +205,14 @@ workflow {
         MODEL_TRAINING.out.model_results,
         MODEL_VALIDATION.out.model_results
     )
+
+    if( case_config.uq.sensitivity ) {
+        SENSITIVITY(
+            case_config.uq.sensitivity_opts,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation),
+            SURROGATE.out.surrogate_models
+        )
+    }
 }

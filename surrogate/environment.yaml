@@ -1,15 +1,11 @@
-name: nuctrans_uq
+name: surrogate
 channels:
   - conda-forge
 dependencies:
   - python=3.11
   - pip
-  # torch comes from conda-forge (the pip wheel is large); the package imports it through bayesvalidrox
   - pytorch-cpu>=2.11.0
   - gpytorch>=1.15.2
   - pip:
-      # The other dependencies come from nuctrans_uq/pyproject.toml.
-      # Temporary: the package lives in this repo and follows main. Nextflow caches the environment by the
-      # text of this file, so a push to main is NOT picked up until work/conda/<hash> is deleted.
       # After the package moves to its own repo, pin a tag as in model/environment.yaml (@v0.1.0).
-      - git+https://github.com/CQ-QianChen/adt_site_selection.git@main#subdirectory=nuctrans_uq
+      - git+https://github.com/CQ-QianChen/adt_site_selection.git@main#subdirectory=nuctrans_fastuq
