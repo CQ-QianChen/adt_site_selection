@@ -100,11 +100,11 @@ uncertain_parameters:
 
 sampling_config:
   training:
-    sample_size: 4
+    sample_size: 500
     sampling_method: sobol
     seed: 21
   validation:
-    sample_size: 4
+    sample_size: 100
     sampling_method: random
     seed: 21
 
