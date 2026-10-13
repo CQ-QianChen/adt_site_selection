@@ -1,24 +1,12 @@
 """
-Sobol sensitivity indices of a saved PCE engine, written to one HDF5 file.
+Sobol sensitivity indices of a saved PCE engine: S1 and ST per parameter, time and depth
+(mean over the bootstrap replicates, plus the replicates) in one HDF5 file (axes under
+`axes/`, a `dims` attribute on every dataset). Indices are NaN where the output has no variance.
 
-    python -m nuctrans_fastuq.uq.sensitivity --engine engine.h5 --config sensitivity_opts.yaml \
-        --output sensitivity_engine_pce_3f9a1c2e.h5
+    python -m nuctrans_fastuq.uq.sensitivity --engine engine.h5 --config sensitivity_opts.yaml --output out.h5
 
-The indices come from the PCE coefficients: no random samples are drawn, so the config has no
-keys yet and any key in it is an error. If anything fails the task stops with the error and no
-file is written.
-
-File layout (every dataset has a `dims` attribute naming its axes):
-    attrs                     case, engine_name, surrogate_type, output_qoi, method, n_bootstrap, created, settings_json
-    axes/parameter_names      uncertain parameters
-    axes/time                 output times
-    axes/depth                output depths (strings, as named in the engine)
-    axes/depth_z              the depths as numbers (NaN where a name is not a number)
-    S1[param, time, depth]    first-order index, mean over the bootstrap replicates
-    ST[param, time, depth]    total-order index, mean over the bootstrap replicates
-    bootstrap/S1[b, param, time, depth], bootstrap/ST[...]   the replicates themselves
-
-Indices are NaN where the output has no variance (a constant output).
+The indices come from the PCE coefficients, so the config has no keys yet and any key is an
+error. Any failure stops the task with the error and writes no file.
 """
 import argparse
 import os

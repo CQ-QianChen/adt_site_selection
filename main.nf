@@ -7,6 +7,7 @@ include { SAMPLING as SAMPLING_TRAINING; SAMPLING as SAMPLING_VALIDATION } from 
 include { MODEL as MODEL_TRAINING; MODEL as MODEL_VALIDATION } from './modules/model.nf'
 include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
+include { PROPAGATION } from './modules/propagation.nf'
 include { engineName; checkKeys } from './modules/utils.nf'
 
 def defaultsConfig() {
@@ -66,7 +67,9 @@ def defaultsConfig() {
         ],
         uq: [
             sensitivity: false,
-            sensitivity_opts: [:]
+            sensitivity_opts: [:],
+            propagation: false,
+            propagation_opts: [:]
         ],
         simulator_config: [
             sort_by_index: 2,
@@ -209,6 +212,16 @@ workflow {
     if( case_config.uq.sensitivity ) {
         SENSITIVITY(
             case_config.uq.sensitivity_opts,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation),
+            SURROGATE.out.surrogate_models
+        )
+    }
+
+    if( case_config.uq.propagation ) {
+        PROPAGATION(
+            case_config.uq.propagation_opts,
             case_name,
             CREATE_DATASTORE.out.hash8,
             engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation),
