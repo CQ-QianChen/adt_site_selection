@@ -1461,8 +1461,9 @@ class PCE(MetaModel):
                     basis_matrix = np.array(self._basis_dict[b_str][out_key][t_str])
                     coeffs = np.asarray(self._coeffs_dict[b_str][out_key][t_str])
 
-                    # 2. Total variance (denominator), skipping index 0 (intercept)
-                    total_var = np.sum(np.square(coeffs[1:]))
+                    # 2. Total variance (denominator): every term but the constant. The sparse
+                    # regression can prune the constant, so index 0 is not always the constant.
+                    total_var = np.sum(np.square(coeffs[np.any(basis_matrix != 0, axis=1)]))
                     if total_var == 0:
                         total_var = np.nan
 
