@@ -9,7 +9,7 @@ process SENSITIVITY {
     val case_name
     val hash8
     val engine_name
-    path surrogate_models
+    path engine_dir
 
     output:
     path "sensitivity_${engine_name}.h5", emit: sensitivity
@@ -19,7 +19,7 @@ process SENSITIVITY {
     echo "${toYaml(sensitivity_opts)}" > sensitivity_opts.yaml
 
     python -m nuctrans_fastuq.uq.sensitivity \
-      --engine surrogate_models/${engine_name}/engine.h5 \
+      --engine ${engine_dir}/engine.h5 \
       --config sensitivity_opts.yaml \
       --output sensitivity_${engine_name}.h5
     """

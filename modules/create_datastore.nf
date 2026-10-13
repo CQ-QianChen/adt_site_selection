@@ -1,4 +1,4 @@
-include { toYaml; computeHash8 } from './utils.nf'
+include { toYaml; caseConfig; caseHash } from './utils.nf'
 
 process CREATE_DATASTORE {
     publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
@@ -12,8 +12,8 @@ process CREATE_DATASTORE {
     val hash8, emit: hash8
 
     script:
-    def case_cfg = config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config', 'surrogate', 'uq']) }
-    hash8 = computeHash8(case_cfg)
+    def case_cfg = caseConfig(config)
+    hash8 = caseHash(config)
     """
     echo "${toYaml(case_cfg)}" > params.yaml
     """

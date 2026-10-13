@@ -20,6 +20,15 @@ def computeHash8(data) {
     return hex[-8..-1]
 }
 
+// the part of the config that identifies the case (and so the datastore folder)
+def caseConfig(config) {
+    return config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config', 'surrogate', 'uq']) }
+}
+
+def caseHash(config) {
+    return computeHash8(caseConfig(config))
+}
+
 def engineName(surrogate_config, training_sampling_config, validation_sampling_config) {
     // surrogate id: its own settings plus the training and validation samples it sees
     def surrogate_hash8 = computeHash8([
@@ -28,6 +37,17 @@ def engineName(surrogate_config, training_sampling_config, validation_sampling_c
         validation: validation_sampling_config
     ])
     return "engine_${surrogate_config.type.toLowerCase()}_${surrogate_hash8}"
+}
+
+def checkEngine(engine, models_dir) {
+    if( engine == null )
+        return
+    if( !(engine instanceof CharSequence) )
+        error "uq.engine must be an engine name or null, got: ${engine}"
+    if( !file("${models_dir}/${engine}/engine.h5").exists() ) {
+        def found = files("${models_dir}/*/engine.h5").collect { it.parent.name }.sort()
+        error "uq.engine ${engine} not found in ${models_dir}; available: ${found}"
+    }
 }
 
 def checkKeys(config, defaults, block) {

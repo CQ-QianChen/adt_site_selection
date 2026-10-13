@@ -2,7 +2,7 @@ include { toYaml; engineName } from './utils.nf'
 
 process SURROGATE {
     conda "$projectDir/surrogate/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${case_name}/${hash8}/surrogate_models" }, mode: 'copy'
 
     input:
     val config
@@ -18,7 +18,7 @@ process SURROGATE {
     path validation_data
 
     output:
-    path "surrogate_models", emit: surrogate_models
+    path "${engineName(config, training_sampling_config, validation_sampling_config)}", emit: engine
 
     script:
     def engine_name = engineName(config, training_sampling_config, validation_sampling_config)
@@ -33,6 +33,6 @@ process SURROGATE {
       --training_data ${training_data} \
       --validation_data ${validation_data} \
       --case_folder . \
-      --engine_folder surrogate_models/${engine_name}
+      --engine_folder ${engine_name}
     """
 }

@@ -9,7 +9,7 @@ process PROPAGATION {
     val case_name
     val hash8
     val engine_name
-    path surrogate_models
+    path engine_dir
 
     output:
     path "propagation_${engine_name}_*.h5", emit: propagation
@@ -21,7 +21,7 @@ process PROPAGATION {
     echo "${toYaml(propagation_opts)}" > propagation_opts.yaml
 
     python -m nuctrans_fastuq.uq.propagation \
-      --engine surrogate_models/${engine_name}/engine.h5 \
+      --engine ${engine_dir}/engine.h5 \
       --config propagation_opts.yaml \
       --output ${out}
     """

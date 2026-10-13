@@ -8,7 +8,7 @@ include { MODEL as MODEL_TRAINING; MODEL as MODEL_VALIDATION } from './modules/m
 include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
-include { engineName; checkKeys } from './modules/utils.nf'
+include { caseHash; engineName; checkEngine; checkKeys } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -66,6 +66,7 @@ def defaultsConfig() {
             get_field_component_index: [0, 1, 2]
         ],
         uq: [
+            engine: null,
             sensitivity: false,
             sensitivity_opts: [:],
             propagation: false,
@@ -141,81 +142,92 @@ workflow {
         case_config.communication_sdh.site_name
     )
 
-    SAMPLING_TRAINING(
-        file("$moduleDir/sampling/sampling_func.py"),
-        case_config.uncertain_parameters,
-        case_config.sampling_config.training,
-        case_name,
-        CREATE_DATASTORE.out.hash8,
-        COMMUNICATION_SDH.out.geometry,
-        COMMUNICATION_SDH.out.rock_data,
-        COMMUNICATION_NTD.out.nuclide_sorption_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
-    )
+    // an engine already in the datastore is not trained again
+    def hash8 = caseHash(case_config)
+    def models_dir = file("$projectDir/datastore/${case_name}/${hash8}/surrogate_models")
+    checkEngine(case_config.uq.engine, models_dir)
+    def engine_name = case_config.uq.engine ?: engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation)
+    def engine_dir = file("${models_dir}/${engine_name}")
+    def engine = channel.value(engine_dir)
 
-    SAMPLING_VALIDATION(
-        file("$moduleDir/sampling/sampling_func.py"),
-        case_config.uncertain_parameters,
-        case_config.sampling_config.validation,
-        case_name,
-        CREATE_DATASTORE.out.hash8,
-        COMMUNICATION_SDH.out.geometry,
-        COMMUNICATION_SDH.out.rock_data,
-        COMMUNICATION_NTD.out.nuclide_sorption_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
-    )
+    if( !file("${engine_dir}/engine.h5").exists() ) {
+        SAMPLING_TRAINING(
+            file("$moduleDir/sampling/sampling_func.py"),
+            case_config.uncertain_parameters,
+            case_config.sampling_config.training,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_NTD.out.nuclide_sorption_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
+        )
 
-    MODEL_TRAINING(
-        case_config.model,
-        case_name,
-        CREATE_DATASTORE.out.hash8,
-        COMMUNICATION_SDH.out.rock_data,
-        COMMUNICATION_SDH.out.site_data,
-        COMMUNICATION_SDH.out.geometry,
-        COMMUNICATION_NTD.out.nuclide_emitted_energy_data,
-        COMMUNICATION_NTD.out.nuclide_species_data,
-        COMMUNICATION_NTD.out.nuclide_sorption_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        SAMPLING_TRAINING.out.sampled_data,
-        case_config.simulator_config
-    )
+        SAMPLING_VALIDATION(
+            file("$moduleDir/sampling/sampling_func.py"),
+            case_config.uncertain_parameters,
+            case_config.sampling_config.validation,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_NTD.out.nuclide_sorption_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
+        )
 
-    MODEL_VALIDATION(
-        case_config.model,
-        case_name,
-        CREATE_DATASTORE.out.hash8,
-        COMMUNICATION_SDH.out.rock_data,
-        COMMUNICATION_SDH.out.site_data,
-        COMMUNICATION_SDH.out.geometry,
-        COMMUNICATION_NTD.out.nuclide_emitted_energy_data,
-        COMMUNICATION_NTD.out.nuclide_species_data,
-        COMMUNICATION_NTD.out.nuclide_sorption_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        SAMPLING_VALIDATION.out.sampled_data,
-        case_config.simulator_config
-    )
+        MODEL_TRAINING(
+            case_config.model,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_SDH.out.site_data,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_NTD.out.nuclide_emitted_energy_data,
+            COMMUNICATION_NTD.out.nuclide_species_data,
+            COMMUNICATION_NTD.out.nuclide_sorption_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+            SAMPLING_TRAINING.out.sampled_data,
+            case_config.simulator_config
+        )
 
-    SURROGATE(
-        case_config.surrogate,
-        case_config.uncertain_parameters,
-        case_name,
-        CREATE_DATASTORE.out.hash8,
-        case_config.sampling_config.training,
-        case_config.sampling_config.validation,
-        COMMUNICATION_SDH.out.geometry,
-        COMMUNICATION_SDH.out.rock_data,
-        COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
-        MODEL_TRAINING.out.model_results,
-        MODEL_VALIDATION.out.model_results
-    )
+        MODEL_VALIDATION(
+            case_config.model,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_SDH.out.site_data,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_NTD.out.nuclide_emitted_energy_data,
+            COMMUNICATION_NTD.out.nuclide_species_data,
+            COMMUNICATION_NTD.out.nuclide_sorption_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+            SAMPLING_VALIDATION.out.sampled_data,
+            case_config.simulator_config
+        )
+
+        SURROGATE(
+            case_config.surrogate,
+            case_config.uncertain_parameters,
+            case_name,
+            CREATE_DATASTORE.out.hash8,
+            case_config.sampling_config.training,
+            case_config.sampling_config.validation,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
+            MODEL_TRAINING.out.model_results,
+            MODEL_VALIDATION.out.model_results
+        )
+        engine = SURROGATE.out.engine
+    }
 
     if( case_config.uq.sensitivity ) {
         SENSITIVITY(
             case_config.uq.sensitivity_opts,
             case_name,
             CREATE_DATASTORE.out.hash8,
-            engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation),
-            SURROGATE.out.surrogate_models
+            engine_name,
+            engine
         )
     }
 
@@ -224,8 +236,8 @@ workflow {
             case_config.uq.propagation_opts,
             case_name,
             CREATE_DATASTORE.out.hash8,
-            engineName(case_config.surrogate, case_config.sampling_config.training, case_config.sampling_config.validation),
-            SURROGATE.out.surrogate_models
+            engine_name,
+            engine
         )
     }
 }
