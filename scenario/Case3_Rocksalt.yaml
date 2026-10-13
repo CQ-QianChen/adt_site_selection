@@ -122,7 +122,6 @@ model:
   sorption: true
 
 simulator_config:
-  n_jobs: 4
   parallel: True
   keep_vtu: False
 

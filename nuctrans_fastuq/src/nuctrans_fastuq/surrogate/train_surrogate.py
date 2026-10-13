@@ -69,7 +69,6 @@ def main():
         output_qoi=exp.output_qoi,
         z_interest=exp.z_interest,
         t_interest=exp.t_interest,
-        parallel=exp.surrogate.get("parallel", False),
         transform=exp.surrogate.get("transform"),
         qoi_floor=exp.qoi_floor,
         z_range=exp.z_range,

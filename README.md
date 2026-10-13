@@ -61,7 +61,7 @@ etc. A scenario file has six top-level sections:
 | `uncertain_parameters`| `SAMPLING`                    | Which rock/nuclide/geometry properties to sample                  |
 | `sampling_config`    | `SAMPLING`                     | `sample_size`, `sampling_method`, `seed`, `save_file_type`         |
 | `model`               | `MODEL`                        | OGS model/simulation setup                                        |
-| `simulator_config`   | `MODEL`                        | `n_jobs`, `parallel`, `keep_vtu`, `sort_by_index`                  |
+| `simulator_config`   | `MODEL`                        | `parallel`, `keep_vtu`, `sort_by_index`                         |
 
 Running the pipeline executes, in order: `CREATE_DATASTORE` (records the
 scenario's config), `COMMUNICATION_SDH` and `COMMUNICATION_NTD` (fetch

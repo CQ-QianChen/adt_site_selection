@@ -42,7 +42,7 @@ process MODEL {
       --sort_by_index ${simulator_config.sort_by_index} \
       --run_mode ${simulator_config.run_mode} \
       --parallel ${simulator_config.parallel ? 'True' : 'False'} \
-      --n_jobs ${simulator_config.n_jobs} \
+      --n_jobs ${task.cpus} \
       --keep_vtu ${simulator_config.keep_vtu ? 'True' : 'False'} \
       --path_to_save_results_hdf5_file model_results/ensemble_results_with_${sampled_data.baseName}.h5 \
       --save_sampled_data ${simulator_config.save_sampled_data}
