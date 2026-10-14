@@ -47,22 +47,22 @@ def _entry_value(entry):
     return float(entry["value"])
 
 
-def read_interfaces(case_dir):
+def read_interfaces(scenario_dir):
     """{interface_name: depth} from rock_interface.yaml."""
-    path = Path(case_dir) / "geometry" / INTERFACE_FILE
+    path = Path(scenario_dir) / "geometry" / INTERFACE_FILE
     if not path.exists():
         raise FileNotFoundError(
             f"Geometry file not found: {path}\n"
-            f"Expected {INTERFACE_FILE} under {Path(case_dir) / 'geometry'}."
+            f"Expected {INTERFACE_FILE} under {Path(scenario_dir) / 'geometry'}."
         )
     with open(path, "r", encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
     return {name: _entry_value(entry) for name, entry in raw.items()}
 
 
-def read_layers(case_dir, interfaces=None):
+def read_layers(scenario_dir, interfaces=None):
     """Layers as [{name, top, bottom, color}], from the surface down."""
-    interfaces = interfaces or read_interfaces(case_dir)
+    interfaces = interfaces or read_interfaces(scenario_dir)
 
     # every *_bottom is a layer; its top is the bottom above (or its own *_top)
     bottoms = {n[: -len("_bottom")]: z
@@ -91,7 +91,7 @@ def read_layers(case_dir, interfaces=None):
 
 
 
-def resolve_depth(name, case_dir=None, interfaces=None, layers=None):
+def resolve_depth(name, scenario_dir=None, interfaces=None, layers=None):
     """Depth of an interface name like 'Host_rock_bottom'. Numbers are
     returned as they are. '<Layer>_top' is taken from the layer table when
     the file does not list it.
@@ -101,13 +101,13 @@ def resolve_depth(name, case_dir=None, interfaces=None, layers=None):
     except (TypeError, ValueError):
         pass
 
-    interfaces = interfaces if interfaces is not None else read_interfaces(case_dir)
+    interfaces = interfaces if interfaces is not None else read_interfaces(scenario_dir)
     if name in interfaces:
         return interfaces[name]
 
     if str(name).endswith("_top"):
         layer_name = str(name)[: -len("_top")]
-        layers = layers if layers is not None else read_layers(case_dir, interfaces)
+        layers = layers if layers is not None else read_layers(scenario_dir, interfaces)
         for layer in layers:
             if layer["name"] == layer_name:
                 return layer["top"]
@@ -120,10 +120,10 @@ def resolve_depth(name, case_dir=None, interfaces=None, layers=None):
 
 
 
-def describe(case_dir):
+def describe(scenario_dir):
     """Print the layers of a case."""
-    layers = read_layers(case_dir)
-    print(f"Stratigraphy for {case_dir}  ({len(layers)} layers)")
+    layers = read_layers(scenario_dir)
+    print(f"Stratigraphy for {scenario_dir}  ({len(layers)} layers)")
     for layer in layers:
         marker = "  <-- host rock" if layer["name"] == HOST_ROCK else ""
         print(f"  {layer['name']:<28} {layer['top']:>10.2f} .. "

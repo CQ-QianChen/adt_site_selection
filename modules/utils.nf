@@ -21,12 +21,12 @@ def computeHash8(data) {
 }
 
 // the part of the config that identifies the case (and so the datastore folder)
-def caseConfig(config) {
+def scenarioConfig(config) {
     return config.findAll { k, v -> !(k in ['simulator_config', 'surrogate', 'uq']) }
 }
 
-def caseHash(config) {
-    return computeHash8(caseConfig(config))
+def scenarioHash(config) {
+    return computeHash8(scenarioConfig(config))
 }
 
 def engineName(surrogate_config, training_sampling_config, validation_sampling_config, scenario_hash8) {
@@ -41,10 +41,10 @@ def engineName(surrogate_config, training_sampling_config, validation_sampling_c
 }
 
 // the engine to use: the one named in uq.engine, else the one the scenario and surrogate settings give (it may not exist yet)
-def resolveEngine(case_config, case_name, surrogate_config, sampling_config, project_dir) {
-    def hash8 = caseHash(case_config)
-    def models_dir = file("${project_dir}/datastore/${case_name}/${hash8}/surrogate_models")
-    def engine = case_config.uq.engine
+def resolveEngine(scenario_config, scenario_name, surrogate_config, sampling_config, project_dir) {
+    def hash8 = scenarioHash(scenario_config)
+    def models_dir = file("${project_dir}/datastore/${scenario_name}/${hash8}/surrogate_models")
+    def engine = scenario_config.uq.engine
     if( engine == null )
         engine = engineName(surrogate_config, sampling_config.training, sampling_config.validation, hash8)
     else if( !(engine instanceof CharSequence) )
@@ -75,9 +75,9 @@ def mergeSampling(sampling, defaults) {
 }
 
 // the yaml with the defaults filled in, the surrogate settings without their sampling, and the sampling config
-def mergeDefaults(config, defaults, case_name) {
+def mergeDefaults(config, defaults, scenario_name) {
     config.communication_sdh = defaults.communication_sdh + config.communication_sdh
-    config.model = defaults.model + config.model + [project_name: case_name]
+    config.model = defaults.model + config.model + [project_name: scenario_name]
     config.simulator_config = defaults.simulator_config + config.simulator_config
     checkKeys(config.uq ?: [:], defaults.uq, 'uq')
     config.uq = defaults.uq + (config.uq ?: [:])

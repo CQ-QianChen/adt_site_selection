@@ -145,31 +145,31 @@ def get_param_names_from_config(uncertain_parameters):
     return [name for name, _, _, _ in iter_uncertain(uncertain_parameters)]
 
 
-def extract_distributions(uncertain_parameters, case_dir):
+def extract_distributions(uncertain_parameters, scenario_dir):
     """Distribution of each uncertain parameter, read from the case folders.
 
     uncertain_parameters: the parsed sampling config.
-    case_dir: output/{Case}/
+    scenario_dir: output/{Case}/
     Returns [{name, dist_type, parameters}], in the same order as the names.
     """
-    case_dir = Path(case_dir)
+    scenario_dir = Path(scenario_dir)
     distributions = []
     cache = {}
 
     for name, folder, layer, prop in iter_uncertain(uncertain_parameters):
         if folder == "geometry":
             # one file, keys are the interface names
-            path = case_dir / folder / f"{layer}.yaml"
+            path = scenario_dir / folder / f"{layer}.yaml"
             key = prop
         else:
             # folder/{layer}.yaml, property is a key inside
-            path = case_dir / folder / f"{layer}.yaml"
+            path = scenario_dir / folder / f"{layer}.yaml"
             key = prop
 
         if not path.exists():
             raise FileNotFoundError(
                 f"Data file for '{name}' not found: {path}\n"
-                f"The config key '{folder}' must match a folder under {case_dir}."
+                f"The config key '{folder}' must match a folder under {scenario_dir}."
             )
 
         if path not in cache:
@@ -215,7 +215,7 @@ def get_output_names(z_interest=None, t_interest=None, output_qoi="I-129"):
         return [output_qoi]
 
 
-def create_input_space(uncertain_parameters, case_dir):
+def create_input_space(uncertain_parameters, scenario_dir):
     """BayesValidRox Input with the marginals read from the case folders."""
     from ..bayesvalidrox import Input
     from ..bayesvalidrox.surrogate_models.input_space import InputSpace
@@ -223,7 +223,7 @@ def create_input_space(uncertain_parameters, case_dir):
     inputs = Input()
 
     # distributions from the case folders
-    distributions = extract_distributions(uncertain_parameters, case_dir)
+    distributions = extract_distributions(uncertain_parameters, scenario_dir)
 
     # add the marginals in order
     for dist in distributions:

@@ -1,7 +1,7 @@
 """
 engine_io.py - Save a trained BayesValidRox Engine as a plain-data HDF5 file, and load it back.
 
-    save_engine(engine, path, case, engine_name, output_qoi, settings=None)
+    save_engine(engine, path, scenario, engine_name, output_qoi, settings=None)
     load_engine(path) -> Engine
 
 The common part (attributes, coordinates, inputs, scaling, training data) is written for every engine. The part
@@ -482,7 +482,7 @@ def surrogate_type_of(engine):
 
 # ---------------------------------------------------------------- entry point
 
-def save_engine(engine, path, case, engine_name, output_qoi, settings=None):
+def save_engine(engine, path, scenario, engine_name, output_qoi, settings=None):
     """Write the engine to an HDF5 file at path.
 
     Written to path + ".tmp" and renamed at the end: if the writer raises (an engine it cannot store),
@@ -491,19 +491,19 @@ def save_engine(engine, path, case, engine_name, output_qoi, settings=None):
     path = Path(path)
     tmp = path.with_name(path.name + ".tmp")
     try:
-        _save(engine, tmp, case, engine_name, output_qoi, settings)
+        _save(engine, tmp, scenario, engine_name, output_qoi, settings)
         os.replace(tmp, path)
     except BaseException:
         tmp.unlink(missing_ok=True)
         raise
 
 
-def _save(engine, path, case, engine_name, output_qoi, settings):
+def _save(engine, path, scenario, engine_name, output_qoi, settings):
     kind = surrogate_type_of(engine)
     meta = engine.meta_model
     with h5py.File(path, "w", libver="latest") as f:  # compact object headers, needs HDF5 >= 1.10
         f.attrs["format_version"] = FORMAT_VERSION
-        f.attrs["case"] = str(case)
+        f.attrs["scenario"] = str(scenario)
         f.attrs["engine_name"] = str(engine_name)
         f.attrs["surrogate_type"] = kind
         f.attrs["output_qoi"] = str(output_qoi)

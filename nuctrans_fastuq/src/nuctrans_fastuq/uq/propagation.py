@@ -94,7 +94,7 @@ def main():
     args = parser.parse_args()
 
     with h5py.File(args.engine, "r") as f:
-        header = {k: str(f.attrs[k]) for k in ("case", "engine_name", "surrogate_type", "output_qoi")}
+        header = {k: str(f.attrs[k]) for k in ("scenario", "engine_name", "surrogate_type", "output_qoi")}
     with open(args.config, "r", encoding="utf-8") as f:
         settings = yaml.safe_load(f) or {}
     write_propagation(load_engine(args.engine), args.output, header, settings)

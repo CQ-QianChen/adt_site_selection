@@ -2,10 +2,10 @@
 Trains a surrogate on the model box's output, validates it right away, and
 saves it together with its validation metrics.
 
-    python -m nuctrans_fastuq.surrogate.train_surrogate --config config.yaml --case_name Case3_Claystone \
+    python -m nuctrans_fastuq.surrogate.train_surrogate --config config.yaml --scenario_name Case3_Claystone \
         --uncertain_parameters uncertain_parameters.yaml \
         --training_data train.h5 --validation_data val.h5 \
-        --case_folder . --engine_folder surrogate_models/engine_pce_3f9a1c2e
+        --scenario_folder . --engine_folder surrogate_models/engine_pce_3f9a1c2e
 
 config.yaml is the surrogate block of the scenario yaml (with the defaults
 applied). All locations are passed in; nothing is looked up by folder layout.
@@ -21,12 +21,12 @@ from .runner import train_surrogate
 def parse_args():
     parser = argparse.ArgumentParser(description="Train and validate a surrogate.")
     parser.add_argument("--config", required=True, help="yaml with the surrogate settings.")
-    parser.add_argument("--case_name", required=True)
+    parser.add_argument("--scenario_name", required=True)
     parser.add_argument("--uncertain_parameters", required=True,
                         help="yaml with the uncertain_parameters block.")
     parser.add_argument("--training_data", required=True, help="Training model results (.h5).")
     parser.add_argument("--validation_data", default=None, help="Validation model results (.h5).")
-    parser.add_argument("--case_folder", required=True,
+    parser.add_argument("--scenario_folder", required=True,
                         help="Folder holding rock_data/, geometry/ and nuclide_water_diffusivity_data/.")
     parser.add_argument("--engine_folder", required=True,
                         help="Folder the engine, manifest and metrics are written to.")
@@ -41,17 +41,17 @@ def main():
         surrogate_cfg = yaml.safe_load(f)
 
     exp = Experiment(
-        name=args.case_name,
+        name=args.scenario_name,
         path=Path(args.config),
         raw={
-            "case": args.case_name,
+            "scenario": args.scenario_name,
             "training_data": str(Path(args.training_data).resolve()),
             "validation_data": (str(Path(args.validation_data).resolve())
                                 if args.validation_data else None),
             "surrogate": surrogate_cfg,
         },
         parameters_file=Path(args.uncertain_parameters),
-        case_folder=Path(args.case_folder),
+        scenario_folder=Path(args.scenario_folder),
         engine_folder=Path(args.engine_folder),
     )
     print(exp.describe())
@@ -62,7 +62,7 @@ def main():
         exp_design_opts=None,
         n_init=exp.n_init,
         parameters_path=exp.parameters_path,
-        case_dir=exp.case_dir,
+        scenario_dir=exp.scenario_dir,
         config_path=exp.config_path,
         training_path=exp.training_path,
         validation_path=exp.validation_path,
@@ -75,7 +75,7 @@ def main():
         z_range=exp.z_range,
         z_min_variance=exp.z_min_variance,
         engine_path=exp.engine_path,
-        case=exp.case,
+        scenario=exp.scenario,
         engine_settings=exp.surrogate_specs(),
         verbose=True,
     )
@@ -83,7 +83,7 @@ def main():
     # Only now that engine.h5 exists do we write its manifest
     exp.write_manifest(exp.engine_path, stage="surrogate", extra={
         "kind": "engine",
-        "case": exp.case,
+        "scenario": exp.scenario,
         "engine_name": exp.engine_path.parent.name,
         "run_name": exp.run_name,
         "output_qoi": exp.output_qoi,

@@ -2,11 +2,11 @@ include { toYaml } from './utils.nf'
 
 process PROPAGATION {
     conda "$projectDir/surrogate/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}/decision_support_uq" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/decision_support_uq" }, mode: 'copy'
 
     input:
     val propagation_opts
-    val case_name
+    val scenario_name
     val hash8
     val engine_name
     path engine_dir

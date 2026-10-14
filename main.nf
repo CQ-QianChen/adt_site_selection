@@ -107,40 +107,40 @@ def defaultsConfig() {
 }
 
 workflow {
-    def case_name = file(params.config_file).getBaseName()
+    def scenario_name = file(params.config_file).getBaseName()
     def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
 
-    def (case_config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaultsConfig(), case_name)
+    def (scenario_config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaultsConfig(), scenario_name)
 
     CREATE_DATASTORE(
-        case_config,
-        case_name
+        scenario_config,
+        scenario_name
     )
 
     COMMUNICATION_SDH(
-        case_config.communication_sdh,
-        case_name,
+        scenario_config.communication_sdh,
+        scenario_name,
         CREATE_DATASTORE.out.hash8
     )
 
     COMMUNICATION_NTD(
-        case_config.communication_ntd,
-        case_name,
+        scenario_config.communication_ntd,
+        scenario_name,
         CREATE_DATASTORE.out.hash8,
         COMMUNICATION_SDH.out.site_data,
-        case_config.communication_sdh.site_name
+        scenario_config.communication_sdh.site_name
     )
 
     // an engine already in the datastore is not trained again
-    def (engine_name, engine_dir) = resolveEngine(case_config, case_name, surrogate_config, sampling_config, projectDir)
+    def (engine_name, engine_dir) = resolveEngine(scenario_config, scenario_name, surrogate_config, sampling_config, projectDir)
     def engine = channel.value(engine_dir)
 
     if( !file("${engine_dir}/engine.h5").exists() ) {
         SAMPLING_TRAINING(
             file("$moduleDir/sampling/sampling_func.py"),
-            case_config.uncertain_parameters,
+            scenario_config.uncertain_parameters,
             sampling_config.training,
-            case_name,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.geometry,
             COMMUNICATION_SDH.out.rock_data,
@@ -150,9 +150,9 @@ workflow {
 
         SAMPLING_VALIDATION(
             file("$moduleDir/sampling/sampling_func.py"),
-            case_config.uncertain_parameters,
+            scenario_config.uncertain_parameters,
             sampling_config.validation,
-            case_name,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.geometry,
             COMMUNICATION_SDH.out.rock_data,
@@ -161,8 +161,8 @@ workflow {
         )
 
         MODEL_TRAINING(
-            case_config.model,
-            case_name,
+            scenario_config.model,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.rock_data,
             COMMUNICATION_SDH.out.site_data,
@@ -172,12 +172,12 @@ workflow {
             COMMUNICATION_NTD.out.nuclide_sorption_data,
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
             SAMPLING_TRAINING.out.sampled_data,
-            case_config.simulator_config
+            scenario_config.simulator_config
         )
 
         MODEL_VALIDATION(
-            case_config.model,
-            case_name,
+            scenario_config.model,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.rock_data,
             COMMUNICATION_SDH.out.site_data,
@@ -187,13 +187,13 @@ workflow {
             COMMUNICATION_NTD.out.nuclide_sorption_data,
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
             SAMPLING_VALIDATION.out.sampled_data,
-            case_config.simulator_config
+            scenario_config.simulator_config
         )
 
         SURROGATE(
             surrogate_config,
-            case_config.uncertain_parameters,
-            case_name,
+            scenario_config.uncertain_parameters,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             sampling_config.training,
             sampling_config.validation,
@@ -206,20 +206,20 @@ workflow {
         engine = SURROGATE.out.engine
     }
 
-    if( case_config.uq.sensitivity ) {
+    if( scenario_config.uq.sensitivity ) {
         SENSITIVITY(
-            case_config.uq.sensitivity_opts,
-            case_name,
+            scenario_config.uq.sensitivity_opts,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             engine_name,
             engine
         )
     }
 
-    if( case_config.uq.propagation ) {
+    if( scenario_config.uq.propagation ) {
         PROPAGATION(
-            case_config.uq.propagation_opts,
-            case_name,
+            scenario_config.uq.propagation_opts,
+            scenario_name,
             CREATE_DATASTORE.out.hash8,
             engine_name,
             engine

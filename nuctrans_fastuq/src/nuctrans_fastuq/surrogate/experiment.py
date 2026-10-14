@@ -3,7 +3,7 @@ experiment.py - One surrogate experiment: the surrogate settings plus the
 locations of the data and of the engine to write.
 
 All options are derived here. Locations are passed in (parameters_file,
-case_folder, engine_folder); see train_surrogate.py.
+scenario_folder, engine_folder); see train_surrogate.py.
 
     exp = Experiment(name=..., path=..., raw={...}, engine_folder=...)
     exp.training_path
@@ -132,7 +132,7 @@ class Experiment:
     workflow_dir: Path = WORKFLOW_DIR
     # Optional explicit locations; when unset the old workflow_dir layout is used.
     parameters_file: Path | None = None    # yaml with uncertain_parameters
-    case_folder: Path | None = None        # has rock_data/, geometry/, nuclide_water_diffusivity_data/
+    scenario_folder: Path | None = None        # has rock_data/, geometry/, nuclide_water_diffusivity_data/
     engine_folder: Path | None = None      # engine.h5 is written straight into this folder
 
     # ---- loading ---------------------------------------------------------- #
@@ -143,9 +143,9 @@ class Experiment:
 
     # ---- top-level settings ---------------------------------------------- #
     @property
-    def case(self):
-        """The case name, e.g. 'Case1_Claystone_Lower-Saxony'."""
-        return str(self._req("case"))
+    def scenario(self):
+        """The scenario name, e.g. 'Case1_Claystone_Lower-Saxony'."""
+        return str(self._req("scenario"))
 
     @property
     def node_tag(self):
@@ -159,12 +159,12 @@ class Experiment:
         if self.parameters_file is not None:
             return Path(self.parameters_file)
         return (self.workflow_dir / "sampling" / "input"
-                / f"sampling_config_{self.case}.yaml")
+                / f"sampling_config_{self.scenario}.yaml")
 
     @property
     def config_path(self):
         """Model config. Not needed for training, only recorded."""
-        return self.workflow_dir / "model" / "input" / f"config_{self.case}.yaml"
+        return self.workflow_dir / "model" / "input" / f"config_{self.scenario}.yaml"
 
     @property
     def has_sampled_geometry(self):
@@ -179,21 +179,21 @@ class Experiment:
         return bool(block.get("geometry"))
 
     @property
-    def case_dir(self):
+    def scenario_dir(self):
         """output/{Case}/"""
-        if self.case_folder is not None:
-            return Path(self.case_folder)
-        return self.workflow_dir / "output" / self.case
+        if self.scenario_folder is not None:
+            return Path(self.scenario_folder)
+        return self.workflow_dir / "output" / self.scenario
 
 
     @property
     def surrogate_setup_dir(self):
         suffix = f"_{self.node_tag}" if self.node_tag else ""
-        return self.workflow_dir / "output" / f"{self.case}{suffix}"
+        return self.workflow_dir / "output" / f"{self.scenario}{suffix}"
 
     @property
     def model_results_dir(self):
-        return self.case_dir / "model_results"
+        return self.scenario_dir / "model_results"
 
     @property
     def training_path(self):
@@ -230,7 +230,7 @@ class Experiment:
         if val1 is not None and not self.has_sampled_geometry:
             from .geometry import resolve_depth
             try:
-                val1 = float(resolve_depth(val1, self.case_dir))
+                val1 = float(resolve_depth(val1, self.scenario_dir))
             except Exception:
                 try:
                     val1 = float(val1)
@@ -245,7 +245,7 @@ class Experiment:
         if val2 is not None and not self.has_sampled_geometry:
             from .geometry import resolve_depth
             try:
-                val2 = float(resolve_depth(val2, self.case_dir))
+                val2 = float(resolve_depth(val2, self.scenario_dir))
             except Exception:
                 try:
                     val2 = float(val2)
@@ -326,13 +326,13 @@ class Experiment:
 
             if interfaces is None:
                 from .geometry import read_interfaces
-                interfaces = read_interfaces(self.case_dir)
+                interfaces = read_interfaces(self.scenario_dir)
             from .geometry import resolve_depth
             try:
-                discrete.append(float(resolve_depth(item, self.case_dir, interfaces)))
+                discrete.append(float(resolve_depth(item, self.scenario_dir, interfaces)))
             except KeyError as exc:
                 raise KeyError(
-                    f"z_interest '{item}' is not a boundary of case '{self.case}'. {exc}"
+                    f"z_interest '{item}' is not a boundary of scenario '{self.scenario}'. {exc}"
                 ) from None
 
         return discrete, ranges
@@ -584,7 +584,7 @@ class Experiment:
         """Settings that define the engine (for the fingerprint and manifest)."""
         st = self.surrogate_type
         base = {
-            "case": self.case,
+            "scenario": self.scenario,
             "node_tag": self.node_tag,
             "output_qoi": self.output_qoi,
             "type": st,
@@ -710,7 +710,7 @@ class Experiment:
         payload = {
             "experiment": self.name,
             "stage": stage,
-            "case": self.case,
+            "scenario": self.scenario,
             "created": datetime.now().isoformat(timespec="seconds"),
             "config_hash": self.config_hash(),
             "git_sha": _git_sha(self.workflow_dir),
@@ -732,10 +732,10 @@ class Experiment:
                 f"(EXPERIMENT = '{self.path.name}' in run_sampling.py)."
             )
         man = read_manifest(self.training_path)
-        if man and man.get("case") not in (None, self.case):
+        if man and man.get("scenario") not in (None, self.scenario):
             raise ValueError(
                 f"Training data {self.training_path.name} was produced for case "
-                f"'{man.get('case')}', but this experiment is '{self.case}'. "
+                f"'{man.get('scenario')}', but this experiment is '{self.scenario}'. "
                 f"Re-run the sampling and model boxes, or fix the config."
             )
 
@@ -748,7 +748,7 @@ class Experiment:
         n_init_str = f" (n_init={self.n_init})" if self.n_init is not None else ""
         lines = [
             f"Experiment : {self.name}   ({self.path})",
-            f"Case       : {self.case}",
+            f"Scenario   : {self.scenario}",
             f"Train      : {self.training_path.name}{n_init_str}  -> {train_rel}",
         ]
         if self.validation_path is not None:

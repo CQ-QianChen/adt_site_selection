@@ -2,11 +2,11 @@ include { toYaml } from './utils.nf'
 
 process COMMUNICATION_SDH {
     conda "$projectDir/communication_sdh/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}" }, mode: 'copy'
 
     input:
     val config
-    val case_name
+    val scenario_name
     val hash8
 
     output:

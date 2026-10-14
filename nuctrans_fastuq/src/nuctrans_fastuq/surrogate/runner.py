@@ -103,7 +103,7 @@ def train_surrogate(
     meta_model_opts,
     exp_design_opts=None,
     parameters_path="sampling/input/sampling_config.yaml",
-    case_dir=None,          # output/{Case}/
+    scenario_dir=None,          # output/{Case}/
     config_path=None,       # model config, optional
     training_path=None,
     validation_path=None,
@@ -119,7 +119,7 @@ def train_surrogate(
     z_range=None,        # (top, bottom) depth window or list of intervals
     z_min_variance=None, # drop depths that do not vary across samples
     engine_path=None,    # where to save engine.h5 (Experiment.engine_path)
-    case=None,           # case name, stored in the engine file
+    scenario=None,       # scenario name, stored in the engine file
     engine_settings=None,  # settings that define the engine, stored in the engine file
     seed=None,           # seeds the random draws that set the input moments and bounds
 ):
@@ -128,12 +128,12 @@ def train_surrogate(
     Returns the trained BayesValidRox Engine.
     """
     parameters_path = Path(parameters_path)
-    if case_dir is None:
+    if scenario_dir is None:
         raise ValueError(
-            "case_dir is required: pass output/{Case}/, the folder holding "
+            "scenario_dir is required: pass output/{Case}/, the folder holding "
             "rock_data/, geometry/ and the nuclide_*_data/ folders."
         )
-    case_dir = Path(case_dir)
+    scenario_dir = Path(scenario_dir)
     if seed is None:
         raise ValueError("seed is required: the input moments and bounds are drawn at random.")
     np.random.seed(seed)  # chaospy draws from the global numpy generator
@@ -221,7 +221,7 @@ def train_surrogate(
     }
 
     # 4. Input space (marginals), from the case's data folders
-    inputs = prepare_data.create_input_space(uncertain_parameters, case_dir)
+    inputs = prepare_data.create_input_space(uncertain_parameters, scenario_dir)
 
     # Give the inputs to the metamodel
     if callable(meta_model_opts):
@@ -289,7 +289,7 @@ def train_surrogate(
     engine_file = Path(engine_path)
     output_path = engine_file.parent
     output_path.mkdir(parents=True, exist_ok=True)
-    save_engine(engine, engine_file, case=case, engine_name=output_path.name,
+    save_engine(engine, engine_file, scenario=scenario, engine_name=output_path.name,
                 output_qoi=output_qoi, settings=engine_settings)
 
     # 8. Validation metrics

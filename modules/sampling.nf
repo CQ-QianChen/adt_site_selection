@@ -2,13 +2,13 @@ include { toYaml } from './utils.nf'
 
 process SAMPLING {
     conda "$projectDir/sampling/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}" }, mode: 'copy'
 
     input:
     path script
     val uncertain_parameters
     val sampling_config
-    val case_name
+    val scenario_name
     val hash8
     path geometry
     path rock_data

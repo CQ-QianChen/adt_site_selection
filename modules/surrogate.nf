@@ -2,12 +2,12 @@ include { toYaml; engineName } from './utils.nf'
 
 process SURROGATE {
     conda "$projectDir/surrogate/environment.yaml"
-    publishDir { "$projectDir/datastore/${case_name}/${hash8}/surrogate_models" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/surrogate_models" }, mode: 'copy'
 
     input:
     val config
     val uncertain_parameters
-    val case_name
+    val scenario_name
     val hash8
     val training_sampling_config
     val validation_sampling_config
@@ -28,11 +28,11 @@ process SURROGATE {
 
     python -m nuctrans_fastuq.surrogate.train_surrogate \
       --config config.yaml \
-      --case_name ${case_name} \
+      --scenario_name ${scenario_name} \
       --uncertain_parameters uncertain_parameters.yaml \
       --training_data ${training_data} \
       --validation_data ${validation_data} \
-      --case_folder . \
+      --scenario_folder . \
       --engine_folder ${engine_name}
     """
 }
