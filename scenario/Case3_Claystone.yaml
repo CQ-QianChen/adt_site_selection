@@ -111,16 +111,6 @@ uncertain_parameters:
     Valanginian_Wealden:
       - I-129
 
-sampling_config:
-  training:
-    sample_size: 500
-    sampling_method: sobol
-    seed: 21
-  validation:
-    sample_size: 100
-    sampling_method: random
-    seed: 21
-
 model:
   create_python_bc: True
   python_bc_source_value: 0.0022
@@ -154,6 +144,15 @@ simulator_config:
 
 surrogate:
   type: pce
+  sampling:
+    training:
+      sample_size: 500
+      sampling_method: sobol
+      seed: 21
+    validation:
+      sample_size: 100
+      sampling_method: random
+      seed: 21
   output_qoi: I-129Flux
   z_interest:
     - Host_rock_top

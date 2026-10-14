@@ -22,7 +22,7 @@ def computeHash8(data) {
 
 // the part of the config that identifies the case (and so the datastore folder)
 def caseConfig(config) {
-    return config.findAll { k, v -> !(k in ['sampling_config', 'simulator_config', 'surrogate', 'uq']) }
+    return config.findAll { k, v -> !(k in ['simulator_config', 'surrogate', 'uq']) }
 }
 
 def caseHash(config) {
@@ -54,4 +54,16 @@ def checkKeys(config, defaults, block) {
     def unknown = config.keySet() - defaults.keySet()
     if( unknown )
         error "unknown keys in the ${block} block: ${unknown.sort()}"
+}
+
+def mergeSampling(sampling, defaults) {
+    if( sampling?.keySet() != ['training', 'validation'] as Set )
+        error "surrogate.sampling needs training and validation, got: ${sampling?.keySet()}"
+    def required = ['sample_size', 'sampling_method', 'seed']
+    return sampling.collectEntries { name, entry ->
+        def missing = required - entry.keySet()
+        if( missing )
+            error "surrogate.sampling.${name} is missing: ${missing}"
+        [(name): defaults + entry]
+    }
 }
