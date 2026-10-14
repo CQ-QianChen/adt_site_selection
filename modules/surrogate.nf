@@ -18,10 +18,10 @@ process SURROGATE {
     path validation_data
 
     output:
-    path "${engineName(config, training_sampling_config, validation_sampling_config)}", emit: engine
+    path "${engineName(config, training_sampling_config, validation_sampling_config, hash8)}", emit: engine
 
     script:
-    def engine_name = engineName(config, training_sampling_config, validation_sampling_config)
+    def engine_name = engineName(config, training_sampling_config, validation_sampling_config, hash8)
     """
     echo "${toYaml(config)}" > config.yaml
     echo "${toYaml([uncertain_parameters: uncertain_parameters])}" > uncertain_parameters.yaml

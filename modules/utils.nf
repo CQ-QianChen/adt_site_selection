@@ -29,9 +29,10 @@ def caseHash(config) {
     return computeHash8(caseConfig(config))
 }
 
-def engineName(surrogate_config, training_sampling_config, validation_sampling_config) {
-    // surrogate id: its own settings plus the training and validation samples it sees
+def engineName(surrogate_config, training_sampling_config, validation_sampling_config, scenario_hash8) {
+    // surrogate id: the scenario, its own settings plus the training and validation samples it sees
     def surrogate_hash8 = computeHash8([
+        scenario: scenario_hash8,
         surrogate: surrogate_config,
         training: training_sampling_config,
         validation: validation_sampling_config
@@ -39,15 +40,20 @@ def engineName(surrogate_config, training_sampling_config, validation_sampling_c
     return "engine_${surrogate_config.type.toLowerCase()}_${surrogate_hash8}"
 }
 
-def checkEngine(engine, models_dir) {
+// the engine to use: the one named in uq.engine, else the one the scenario and surrogate settings give (it may not exist yet)
+def resolveEngine(case_config, case_name, surrogate_config, sampling_config, project_dir) {
+    def hash8 = caseHash(case_config)
+    def models_dir = file("${project_dir}/datastore/${case_name}/${hash8}/surrogate_models")
+    def engine = case_config.uq.engine
     if( engine == null )
-        return
-    if( !(engine instanceof CharSequence) )
+        engine = engineName(surrogate_config, sampling_config.training, sampling_config.validation, hash8)
+    else if( !(engine instanceof CharSequence) )
         error "uq.engine must be an engine name or null, got: ${engine}"
-    if( !file("${models_dir}/${engine}/engine.h5").exists() ) {
+    else if( !file("${models_dir}/${engine}/engine.h5").exists() ) {
         def found = files("${models_dir}/*/engine.h5").collect { it.parent.name }.sort()
         error "uq.engine ${engine} not found in ${models_dir}; available: ${found}"
     }
+    return [engine, file("${models_dir}/${engine}")]
 }
 
 def checkKeys(config, defaults, block) {
@@ -66,4 +72,20 @@ def mergeSampling(sampling, defaults) {
             error "surrogate.sampling.${name} is missing: ${missing}"
         [(name): defaults + entry]
     }
+}
+
+// the yaml with the defaults filled in, the surrogate settings without their sampling, and the sampling config
+def mergeDefaults(config, defaults, case_name) {
+    config.communication_sdh = defaults.communication_sdh + config.communication_sdh
+    config.model = defaults.model + config.model + [project_name: case_name]
+    config.simulator_config = defaults.simulator_config + config.simulator_config
+    checkKeys(config.uq ?: [:], defaults.uq, 'uq')
+    config.uq = defaults.uq + (config.uq ?: [:])
+    def sampling_config = mergeSampling(config.surrogate.sampling, defaults.sampling)
+    config.surrogate = defaults.surrogate + config.surrogate + [
+        pce_opts: defaults.surrogate.pce_opts + (config.surrogate.pce_opts ?: [:]),
+        gp_opts: defaults.surrogate.gp_opts + (config.surrogate.gp_opts ?: [:])
+    ]
+    def surrogate_config = config.surrogate.findAll { k, v -> k != 'sampling' }
+    return [config, surrogate_config, sampling_config]
 }

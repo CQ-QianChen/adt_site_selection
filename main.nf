@@ -8,7 +8,7 @@ include { MODEL as MODEL_TRAINING; MODEL as MODEL_VALIDATION } from './modules/m
 include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
-include { caseHash; engineName; checkEngine; checkKeys; mergeSampling } from './modules/utils.nf'
+include { mergeDefaults; resolveEngine } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -108,21 +108,10 @@ def defaultsConfig() {
 
 workflow {
     def case_name = file(params.config_file).getBaseName()
-    def case_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+    def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
 
-    case_config.communication_sdh = defaultsConfig().communication_sdh + case_config.communication_sdh
-    case_config.model = defaultsConfig().model + case_config.model + [project_name: case_name]
-    case_config.simulator_config = defaultsConfig().simulator_config + case_config.simulator_config
-    checkKeys(case_config.uq ?: [:], defaultsConfig().uq, 'uq')
-    case_config.uq = defaultsConfig().uq + (case_config.uq ?: [:])
-    def surrogate_defaults = defaultsConfig().surrogate
-    def sampling = mergeSampling(case_config.surrogate.sampling, defaultsConfig().sampling)
-    case_config.surrogate = surrogate_defaults + case_config.surrogate + [
-        pce_opts: surrogate_defaults.pce_opts + (case_config.surrogate.pce_opts ?: [:]),
-        gp_opts: surrogate_defaults.gp_opts + (case_config.surrogate.gp_opts ?: [:])
-    ]
-    def surrogate_config = case_config.surrogate.findAll { k, v -> k != 'sampling' }
-    
+    def (case_config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaultsConfig(), case_name)
+
     CREATE_DATASTORE(
         case_config,
         case_name
@@ -143,18 +132,14 @@ workflow {
     )
 
     // an engine already in the datastore is not trained again
-    def hash8 = caseHash(case_config)
-    def models_dir = file("$projectDir/datastore/${case_name}/${hash8}/surrogate_models")
-    checkEngine(case_config.uq.engine, models_dir)
-    def engine_name = case_config.uq.engine ?: engineName(surrogate_config, sampling.training, sampling.validation)
-    def engine_dir = file("${models_dir}/${engine_name}")
+    def (engine_name, engine_dir) = resolveEngine(case_config, case_name, surrogate_config, sampling_config, projectDir)
     def engine = channel.value(engine_dir)
 
     if( !file("${engine_dir}/engine.h5").exists() ) {
         SAMPLING_TRAINING(
             file("$moduleDir/sampling/sampling_func.py"),
             case_config.uncertain_parameters,
-            sampling.training,
+            sampling_config.training,
             case_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.geometry,
@@ -166,7 +151,7 @@ workflow {
         SAMPLING_VALIDATION(
             file("$moduleDir/sampling/sampling_func.py"),
             case_config.uncertain_parameters,
-            sampling.validation,
+            sampling_config.validation,
             case_name,
             CREATE_DATASTORE.out.hash8,
             COMMUNICATION_SDH.out.geometry,
@@ -210,8 +195,8 @@ workflow {
             case_config.uncertain_parameters,
             case_name,
             CREATE_DATASTORE.out.hash8,
-            sampling.training,
-            sampling.validation,
+            sampling_config.training,
+            sampling_config.validation,
             COMMUNICATION_SDH.out.geometry,
             COMMUNICATION_SDH.out.rock_data,
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data,
