@@ -151,3 +151,11 @@ surrogate:
   pce_opts:
     q_norm: 1.0
     degree: [3, 5, 6]
+
+uq:
+  sensitivity: true
+  sensitivity_opts: {}
+  propagation: true
+  propagation_opts:
+    n_samples: 10000
+    seed: 42
