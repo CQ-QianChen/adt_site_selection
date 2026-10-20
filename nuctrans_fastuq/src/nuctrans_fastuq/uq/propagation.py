@@ -19,7 +19,7 @@ import numpy as np
 import yaml
 
 from ..surrogate.engine_io import load_engine
-from .sensitivity import _STR, _dataset, _to_float
+from .sensitivity import _STR, _dataset, _to_float, read_header
 
 KEYS = ("n_samples", "seed")
 SAMPLING_METHODS = ("random", "latin_hypercube", "sobol", "halton", "hammersley")
@@ -93,11 +93,9 @@ def main():
     parser.add_argument("--output", required=True, help="HDF5 file to write.")
     args = parser.parse_args()
 
-    with h5py.File(args.engine, "r") as f:
-        header = {k: str(f.attrs[k]) for k in ("scenario", "engine_name", "surrogate_type", "output_qoi")}
     with open(args.config, "r", encoding="utf-8") as f:
         settings = yaml.safe_load(f) or {}
-    write_propagation(load_engine(args.engine), args.output, header, settings)
+    write_propagation(load_engine(args.engine), args.output, read_header(args.engine), settings)
     print(f"wrote {args.output}")
 
 

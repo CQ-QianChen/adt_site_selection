@@ -25,6 +25,13 @@ METHOD = "pce"
 _STR = h5py.string_dtype(encoding="utf-8")
 
 
+def read_header(engine_path):
+    with h5py.File(engine_path, "r") as f:
+        header = {k: str(f.attrs[k]) for k in ("scenario", "engine_name", "surrogate_type", "output_qoi")}
+    header["qoi_unit"] = "mol/(m² year)" if "flux" in header["output_qoi"].lower() else "mol/L"
+    return header
+
+
 def sobol_replicates(engine):
     """S1 and ST of every bootstrap replicate: two arrays [b, param, time, depth]."""
     meta = engine.meta_model
@@ -99,11 +106,9 @@ def main():
     parser.add_argument("--output", required=True, help="HDF5 file to write.")
     args = parser.parse_args()
 
-    with h5py.File(args.engine, "r") as f:
-        header = {k: str(f.attrs[k]) for k in ("scenario", "engine_name", "surrogate_type", "output_qoi")}
     with open(args.config, "r", encoding="utf-8") as f:
         settings = yaml.safe_load(f) or {}
-    write_sensitivity(load_engine(args.engine), args.output, header, settings)
+    write_sensitivity(load_engine(args.engine), args.output, read_header(args.engine), settings)
     print(f"wrote {args.output}")
 
 
