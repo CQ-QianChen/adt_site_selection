@@ -9,6 +9,7 @@ include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
 include { ANALYSIS } from './modules/analysis.nf'
+include { REPORT } from './modules/report.nf'
 include { mergeDefaults; resolveEngine; runHash } from './modules/utils.nf'
 
 def defaultsConfig() {
@@ -251,6 +252,15 @@ workflow {
             COMMUNICATION_SDH.out.geometry,
             COMMUNICATION_SDH.out.rock_data,
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
+        )
+        REPORT(
+            file("$moduleDir/report/build.py"),
+            file("$moduleDir/report/fonts"),
+            ANALYSIS.out.analysis,
+            ANALYSIS.out.scenario,
+            scenario_name,
+            CREATE_DATASTORE.out.hash8,
+            run_hash
         )
     }
 }

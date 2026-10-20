@@ -17,6 +17,7 @@ SECTIONS = [  # (chip, colour, title, plot types): a section without figures is 
     ("RELIABILITY ASSESSMENT", RELIABILITY, "Sensitivity analysis", ["sobol_heatmap", "sobol_ranking", "dependence"]),
 ]
 SUPERSCRIPT = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
+SKIP = {"sim_setup", "get_field_component_index", "process_variables", "secondary_variables", "quantity_of_interests", "create_meshes", "create_python_bc", "mesh_dimension", "project_name", "n_init", "seed"}
 LEFT, RIGHT, TOP, BOTTOM = 15, 195, 28, 18  # page margins (mm)
 
 
@@ -26,8 +27,8 @@ def sci(value, digits=2):
     return f"{float(mantissa):g} × 10{str(int(exponent)).translate(SUPERSCRIPT)}" if value else "0"
 
 
-def read(folder, name):
-    return yaml.safe_load((folder / name).read_text(encoding="utf-8")) if (folder / name).exists() else {}
+def read(path):
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 def nested(block, *keys):
@@ -209,16 +210,17 @@ def settings(pdf, x, y, width, groups):
             rows_needed = max(len(pdf.multi_cell(width * 0.5, 4.2, part, dry_run=True, output="LINES")) for part in (key, text))
             pdf.set_xy(x, y)
             pdf.set_text_color(*MUTED)
-            pdf.multi_cell(width * 0.5, 4.2, key)
+            pdf.multi_cell(width * 0.5, 4.2, key, align="L")
             pdf.set_xy(x + width * 0.5, y)
             pdf.set_text_color(*INK)
-            pdf.multi_cell(width * 0.5, 4.2, text)
+            pdf.multi_cell(width * 0.5, 4.2, text, align="L")
             y += 4.2 * rows_needed
     return y
 
 
 def groups(block, general):
-    """A block's nested settings as groups: one per sub-block, the plain entries under `general`."""
+    """A block's nested settings as groups: one per sub-block, the plain entries under `general`; simulator internals and the options of other surrogate types are left out."""
+    block = {k: v for k, v in block.items() if k not in SKIP and not (k.endswith("_opts") and k != f"{block.get('type')}_opts")}
     plain = {k: v for k, v in block.items() if not isinstance(v, dict)}
     return ([(general, flatten(plain))] if plain else []) + [(k.replace("_", " ").capitalize(), flatten(v)) for k, v in block.items() if isinstance(v, dict)]
 
@@ -226,13 +228,14 @@ def groups(block, general):
 def main():
     parser = argparse.ArgumentParser(description="PDF report of one scenario from its analysis folder.")
     parser.add_argument("--analysis", required=True, help="folder with stats.json, figures.json and the figures")
+    parser.add_argument("--scenario", required=True, help="yaml of the scenario, for the settings")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     folder = Path(args.analysis)
     stats, index = json.loads((folder / "stats.json").read_text()), json.loads((folder / "figures.json").read_text())
-    head, setup = stats["header"], read(folder, "setup.yaml")
+    head, scenario = stats["header"], read(Path(args.scenario))
     unit = head["qoi_unit"]
-    n_inputs = sum(len(v) for group in (setup.get("uncertain_parameters") or {}).values() for v in group.values())
+    n_inputs = sum(len(v) for group in (scenario.get("uncertain_parameters") or {}).values() for v in group.values())
     threshold = next((d["threshold"]["value"] for d in stats["depths"].values() if "threshold" in d), None)
     evolution = [e for e in index if e["plot"] == "profile"] or [e for e in index if e["plot"] == "timeseries"]
     depths = list(dict.fromkeys(e["depth"] for e in index if e["depth"] is not None))
@@ -267,9 +270,9 @@ def main():
             x, tallest = x + w / dpi * 25.4 + 4, max(tallest, h / dpi * 25.4)
         pdf.set_y(pdf.get_y() + tallest + 3)
 
-    if setup:
+    if scenario:
         pdf.add_page()
-        surrogate = setup.get("surrogate", {})
+        surrogate = scenario.get("surrogate", {})
         n_train, n_valid = nested(surrogate, "sampling", "training", "sample_size"), nested(surrogate, "sampling", "validation", "sample_size")
         pdf.opener("PREDICTION", PREDICTION, "Model and surrogate", "A surrogate M̃ emulates the high-fidelity simulator M: Y = M(x) ≈ M̃(x) + ε" + (f". It is trained on {n_train} simulations" if n_train else "")
                   + (f" and checked against {n_valid} independent ones" if n_valid else "") + ".")
@@ -284,7 +287,7 @@ def main():
             pdf.ln(2)
         pdf.subheading("Settings")
         y = pdf.get_y()
-        left = settings(pdf, LEFT, y, 85, [("Site", flatten({k: setup[k] for k in ("site", "nuclides") if k in setup}))] + groups(setup.get("model", {}), "Model"))
+        left = settings(pdf, LEFT, y, 85, [("Site", flatten({"site": nested(scenario, "communication_sdh", "site_name"), "nuclides": nested(scenario, "communication_ntd", "nuclide_to_consider")}))] + groups(scenario.get("model", {}), "Model"))
         right = settings(pdf, LEFT + 95, y, 85, groups(surrogate, "Surrogate"))
         pdf.set_y(max(left, right) + 4)
 
@@ -315,8 +318,8 @@ def main():
 
     pdf.add_page()
     pdf.opener("RUN INFORMATION", SUMMARY, "Run information", "What produced this report, for reproducing and tracing it.")
-    sampling, provenance = surrogate.get("sampling", {}) if setup else {}, stats.get("provenance", {})
-    identity = [("Scenario", head["scenario"]), ("Scenario hash", provenance.get("scenario_hash")), ("Engine", f"{head['engine_name']} ({head['surrogate_type']})"), ("Output", f"{head['output_qoi']} [{unit}]")]
+    sampling, provenance = surrogate.get("sampling", {}) if scenario else {}, stats.get("provenance", {})
+    identity = [("Scenario", head["scenario"].replace("_", " ")), ("Scenario hash", provenance.get("scenario_hash")), ("Run hash", provenance.get("run_hash")), ("Engine", f"{head['engine_name']} ({head['surrogate_type']})"), ("Output", f"{head['output_qoi']} [{unit}]")]
     samples = [(f"{name.capitalize()} samples", f"{v['sample_size']}, {v['sampling_method']}, seed {v['seed']}") for name, v in sampling.items() if isinstance(v, dict) and "sample_size" in v]
     y = pdf.get_y()
     left = settings(pdf, LEFT, y, 85, [("Identity", [row for row in identity if row[1]]), ("Dates", [("Engine computed", head["created"][:16].replace("T", " ")), ("Report generated", pdf.generated)])])
