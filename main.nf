@@ -241,11 +241,10 @@ workflow {
             error "analysis needs uq.sensitivity and uq.propagation to be true"
         ANALYSIS(
             file("$moduleDir/analysis/analyze.py"),
-            scenario_config.analysis,
-            [site: scenario_config.communication_sdh.site_name, nuclides: scenario_config.communication_ntd.nuclide_to_consider,
-             uncertain_parameters: scenario_config.uncertain_parameters, model: scenario_config.model, surrogate: scenario_config.surrogate],
+            scenario_config,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
+            run_hash,
             engine,
             PROPAGATION.out.propagation,
             SENSITIVITY.out.sensitivity,

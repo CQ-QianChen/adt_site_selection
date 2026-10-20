@@ -44,8 +44,10 @@ def with_times(items, propagation):
     return out
 
 
-def generate(propagation_path, sensitivity_path, geometry_path, config, output_dir, data=(), engine=None, setup=None, scenario_hash=None):
+def generate(propagation_path, sensitivity_path, geometry_path, scenario_path, output_dir, data=(), engine=None, scenario_hash=None, run_hash=None):
     """Write stats.json, the figures listed in the analysis config and figures.json, an index of the figures for the report."""
+    scenario = yaml.safe_load(Path(scenario_path).read_text(encoding="utf-8"))
+    config = scenario.get("analysis") or {}
     if set(config) - KEYS or not config.get("figures"):
         raise SystemExit(f"analysis config: keys are {sorted(KEYS)} and figures is required, got {sorted(config)}")
     out = Path(output_dir)
@@ -73,9 +75,7 @@ def generate(propagation_path, sensitivity_path, geometry_path, config, output_d
                 key = numeric[min(numeric, key=lambda value: abs(value - z))]
             values = np.array(r2[key], dtype=float)
             stats["validation"][name] = {"r2_min": float(np.nanmin(values)), "r2_mean": float(np.nanmean(values))}
-    stats["provenance"] = {"scenario_hash": scenario_hash, "data": {Path(folder).name: hashlib.sha256(b"".join(f.read_bytes() for f in sorted(Path(folder).rglob("*")) if f.is_file())).hexdigest()[:8] for folder in data}}
-    if setup:
-        (out / "setup.yaml").write_text(Path(setup).read_text(encoding="utf-8"), encoding="utf-8")
+    stats["provenance"] = {"scenario_hash": scenario_hash, "run_hash": run_hash, "data": {Path(folder).name: hashlib.sha256(b"".join(f.read_bytes() for f in sorted(Path(folder).rglob("*")) if f.is_file())).hexdigest()[:8] for folder in data}}
     (out / "stats.json").write_text(json.dumps(stats, indent=2, default=lambda value: value.item()), encoding="utf-8")
 
     for item in with_times(expand(config["figures"]), propagation):
@@ -116,14 +116,12 @@ def main():
     parser.add_argument("--geometry", required=True, help="rock_interface.yaml")
     parser.add_argument("--data", nargs="*", default=[], help="folders with the input data (geometry, rock_data, ...), for the units of the inputs")
     parser.add_argument("--engine", help="engine folder, for the validation metrics")
-    parser.add_argument("--setup", help="yaml with the model and surrogate settings of the scenario, copied into the output")
+    parser.add_argument("--scenario", required=True, help="yaml of the scenario with its analysis block")
     parser.add_argument("--hash", help="hash of the scenario, for the run information")
-    parser.add_argument("--config", required=True, help="yaml with the analysis block of the scenario")
+    parser.add_argument("--run-hash", help="hash of the run, for the run information")
     parser.add_argument("--output-dir", required=True)
     args = parser.parse_args()
-    with open(args.config, encoding="utf-8") as f:
-        config = yaml.safe_load(f) or {}
-    generate(args.propagation, args.sensitivity, args.geometry, config, args.output_dir, args.data, args.engine, args.setup, args.hash)
+    generate(args.propagation, args.sensitivity, args.geometry, args.scenario, args.output_dir, args.data, args.engine, args.hash, args.run_hash)
 
 
 if __name__ == "__main__":
