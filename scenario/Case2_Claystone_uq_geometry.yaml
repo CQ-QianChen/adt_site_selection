@@ -158,3 +158,31 @@ uq:
   propagation_opts:
     n_samples: 10000
     seed: 42
+
+analysis:
+  qoi:
+    nuclide: I-129
+    quantity: Flux
+    threshold: 1.0e-5  # regulatory milestone, mol/(m2 year)
+  labels:
+    "Host rock top": Host_rock_top
+    "Host rock bottom": Host_rock_bottom
+  figures:
+    - plot: stratigraphy
+      style: {width: 60, height: 170}
+    - plot: inputs
+      style: {width: 115}
+    - plot: timeseries
+      depth: [Host_rock_top, Host_rock_bottom]
+      style: {width: 105}
+      stratigraphy: true
+      z_min: -800
+      z_max: -100
+    - plot: distribution
+      depth: [Host_rock_top, Host_rock_bottom]
+    - plot: sobol_heatmap
+      depth: [Host_rock_top, Host_rock_bottom]
+    - plot: sobol_ranking
+      depth: [Host_rock_top, Host_rock_bottom]
+    - plot: dependence
+      depth: [Host_rock_top, Host_rock_bottom]

@@ -22,7 +22,7 @@ def computeHash8(data) {
 
 // the part of the config that identifies the case (and so the datastore folder)
 def scenarioConfig(config) {
-    return config.findAll { k, v -> !(k in ['simulator_config', 'surrogate', 'uq']) }
+    return config.findAll { k, v -> !(k in ['simulator_config', 'surrogate', 'uq', 'analysis']) }
 }
 
 def scenarioHash(config) {
@@ -81,6 +81,8 @@ def mergeDefaults(config, defaults, scenario_name) {
     config.simulator_config = defaults.simulator_config + config.simulator_config
     checkKeys(config.uq ?: [:], defaults.uq, 'uq')
     config.uq = defaults.uq + (config.uq ?: [:])
+    if( config.analysis )
+        config.analysis = [levels: defaults.analysis.levels] + config.analysis + [figures: (config.analysis.figures ?: []).collect { (defaults.analysis.plot_options[it.plot] ?: [:]) + it }]
     def sampling_config = mergeSampling(config.surrogate.sampling, defaults.sampling)
     config.surrogate = defaults.surrogate + config.surrogate + [
         pce_opts: defaults.surrogate.pce_opts + (config.surrogate.pce_opts ?: [:]),

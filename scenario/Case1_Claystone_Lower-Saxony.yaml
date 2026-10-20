@@ -170,3 +170,27 @@ uq:
   propagation_opts:
     n_samples: 10000
     seed: 42
+
+analysis:
+  qoi:
+    nuclide: I-129
+    quantity: Concentration
+    threshold: 4.0e-4  # placeholder, not a regulatory value, mol/L
+  labels:
+    "Host rock top": -400
+    "Host rock bottom": -522.5
+  figures:
+    - plot: stratigraphy
+      style: {width: 60, height: 170}
+    - plot: inputs
+      style: {width: 115}
+    - plot: profile
+      style: {profile_aspect: 2.93, width: 180}  # as in the ACTION Twin figure
+    - plot: distribution
+      depth: [-400, -522.5]
+    - plot: sobol_heatmap
+      depth: [-400, -522.5]
+    - plot: sobol_ranking
+      depth: [-400, -522.5]
+    - plot: dependence
+      depth: [-400, -522.5]

@@ -171,3 +171,29 @@ uq:
   propagation_opts:
     n_samples: 10000
     seed: 42
+
+analysis:
+  qoi:
+    nuclide: I-129
+    quantity: Flux
+    threshold: 1.0e-5  # regulatory milestone, mol/(m2 year)
+  labels:
+    "Host rock top": -400
+    "Host rock bottom": -522.5
+  figures:
+    - plot: stratigraphy
+      style: {width: 60, height: 170}
+    - plot: inputs
+      style: {width: 115}
+    - plot: timeseries
+      depth: [-400, -522.5]
+      style: {width: 105}
+      stratigraphy: true
+    - plot: distribution
+      depth: [-400, -522.5]
+    - plot: sobol_heatmap
+      depth: [-400, -522.5]
+    - plot: sobol_ranking
+      depth: [-400, -522.5]
+    - plot: dependence
+      depth: [-400, -522.5]

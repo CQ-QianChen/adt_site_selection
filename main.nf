@@ -8,6 +8,7 @@ include { MODEL as MODEL_TRAINING; MODEL as MODEL_VALIDATION } from './modules/m
 include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
+include { ANALYSIS } from './modules/analysis.nf'
 include { mergeDefaults; resolveEngine } from './modules/utils.nf'
 
 def defaultsConfig() {
@@ -64,6 +65,14 @@ def defaultsConfig() {
                 ]
             ],
             get_field_component_index: [0, 1, 2]
+        ],
+        // levels: shares of the samples whose peak exceeds the threshold that make the exceedance level medium and high; plot_options: options of every figure of a plot type
+        analysis: [
+            levels: [0.1, 0.2],
+            plot_options: [
+                timeseries: [log_x: true],
+                sobol_heatmap: [log_time: true, log_color: true]
+            ]
         ],
         uq: [
             engine: null,
@@ -223,6 +232,25 @@ workflow {
             CREATE_DATASTORE.out.hash8,
             engine_name,
             engine
+        )
+    }
+
+    if( scenario_config.analysis ) {
+        if( !scenario_config.uq.sensitivity || !scenario_config.uq.propagation )
+            error "analysis needs uq.sensitivity and uq.propagation to be true"
+        ANALYSIS(
+            file("$moduleDir/analysis/analyze.py"),
+            scenario_config.analysis,
+            [site: scenario_config.communication_sdh.site_name, nuclides: scenario_config.communication_ntd.nuclide_to_consider,
+             uncertain_parameters: scenario_config.uncertain_parameters, model: scenario_config.model, surrogate: scenario_config.surrogate],
+            scenario_name,
+            CREATE_DATASTORE.out.hash8,
+            engine,
+            PROPAGATION.out.propagation,
+            SENSITIVITY.out.sensitivity,
+            COMMUNICATION_SDH.out.geometry,
+            COMMUNICATION_SDH.out.rock_data,
+            COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
         )
     }
 }
