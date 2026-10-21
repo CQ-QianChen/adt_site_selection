@@ -22,7 +22,7 @@ def computeHash8(data) {
 
 // the part of the config that identifies the case (and so the datastore folder)
 def scenarioConfig(config) {
-    return config.findAll { k, v -> !(k in ['simulator_config', 'surrogate', 'uq', 'analysis']) }
+    return config.findAll { k, v -> !(k in ['name', 'simulator_config', 'surrogate', 'uq', 'analysis']) }
 }
 
 def scenarioHash(config) {
@@ -85,9 +85,9 @@ def mergeSampling(sampling, defaults) {
 }
 
 // the yaml with the defaults filled in, the surrogate settings without their sampling, and the sampling config
-def mergeDefaults(config, defaults, scenario_name) {
+def mergeDefaults(config, defaults) {
     config.communication_sdh = defaults.communication_sdh + config.communication_sdh
-    config.model = defaults.model + config.model + [project_name: scenario_name]
+    config.model = defaults.model + config.model + [project_name: config.name]
     config.simulator_config = defaults.simulator_config + config.simulator_config
     checkKeys(config.uq ?: [:], defaults.uq, 'uq')
     config.uq = defaults.uq + (config.uq ?: [:])

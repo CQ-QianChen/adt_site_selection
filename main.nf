@@ -117,10 +117,12 @@ def defaultsConfig() {
 }
 
 workflow {
-    def scenario_name = file(params.config_file).getBaseName()
     def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
+    if( !yaml_config.name )
+        error "${params.config_file} needs a name: it names the datastore folder of the scenario"
+    def scenario_name = yaml_config.name
 
-    def (scenario_config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaultsConfig(), scenario_name)
+    def (scenario_config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaultsConfig())
 
     CREATE_DATASTORE(
         scenario_config,
