@@ -1,5 +1,5 @@
 process REPORT {
-    conda "$projectDir/report/environment.yaml"
+    conda "$projectDir/decision_support_report/environment.yaml"
     publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/decision_support/${uq_hash}/analysis/${analysis_hash}" }, mode: 'copy'
 
     input:

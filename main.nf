@@ -244,7 +244,7 @@ workflow {
         if( !scenario_config.uq.sensitivity || !scenario_config.uq.propagation )
             error "analysis needs uq.sensitivity and uq.propagation to be true"
         ANALYSIS(
-            file("$moduleDir/analysis/analyze.py"),
+            file("$moduleDir/decision_support_analysis/analyze.py"),
             scenario_config,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
@@ -258,8 +258,8 @@ workflow {
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
         )
         REPORT(
-            file("$moduleDir/report/build.py"),
-            file("$moduleDir/report/fonts"),
+            file("$moduleDir/decision_support_report/build.py"),
+            file("$moduleDir/decision_support_report/fonts"),
             ANALYSIS.out.analysis,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
