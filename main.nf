@@ -259,7 +259,6 @@ workflow {
         )
         REPORT(
             file("$moduleDir/decision_support_report/build.py"),
-            file("$moduleDir/decision_support_report/fonts"),
             ANALYSIS.out.analysis,
             scenario_name,
             CREATE_DATASTORE.out.hash8,

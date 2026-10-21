@@ -4,7 +4,6 @@ process REPORT {
 
     input:
     path build
-    path fonts
     path analysis
     val scenario_name
     val hash8
