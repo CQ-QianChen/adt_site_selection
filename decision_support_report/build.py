@@ -223,11 +223,12 @@ def groups(block, general):
 
 def main():
     parser = argparse.ArgumentParser(description="PDF report of one scenario from its analysis folder.")
-    parser.add_argument("--analysis", required=True, help="folder with stats.json, figures.json and the figures")
+    parser.add_argument("--analysis", required=True, help="folder with stats.json, figures.json and the figures folder")
     parser.add_argument("--scenario", required=True, help="yaml of the scenario, for the settings")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     folder = Path(args.analysis)
+    figures = folder / "figures"
     stats, index = json.loads((folder / "stats.json").read_text()), json.loads((folder / "figures.json").read_text())
     head, scenario = stats["header"], read(Path(args.scenario))
     unit = head["qoi_unit"]
@@ -249,9 +250,9 @@ def main():
                       + ": median (dashed), 5-95 % band" + (", threshold (dotted red)" if threshold else "") + ".", 8, MUTED, 4)
         for entry in evolution:
             if entry["depth"] is not None:
-                pdf.keep(folder, entry, 6)
+                pdf.keep(figures, entry, 6)
                 pdf.paragraph(entry["depth"], 8.5, INK, 5)
-            pdf.image_at(folder, entry)
+            pdf.image_at(figures, entry)
 
 
     entries = [e for e in index if e["plot"] in ("stratigraphy", "inputs")]
@@ -260,9 +261,9 @@ def main():
         pdf.opener("INFORMATION", INFORMATION, "Inputs", "The stratigraphy and the " + (f"{n_inputs} " if n_inputs else "") + "uncertain inputs of the model, each a probability distribution per rock layer, propagated through the surrogate to the prediction.")
         x, tallest = LEFT, 0
         for entry in entries:
-            w, h = Image.open(folder / entry["file"]).size
-            dpi = Image.open(folder / entry["file"]).info.get("dpi", (300, 300))[0]
-            pdf.image(str(folder / entry["file"]), x=x, y=pdf.get_y() + 1, w=w / dpi * 25.4)
+            w, h = Image.open(figures / entry["file"]).size
+            dpi = Image.open(figures / entry["file"]).info.get("dpi", (300, 300))[0]
+            pdf.image(str(figures / entry["file"]), x=x, y=pdf.get_y() + 1, w=w / dpi * 25.4)
             x, tallest = x + w / dpi * 25.4 + 4, max(tallest, h / dpi * 25.4)
         pdf.set_y(pdf.get_y() + tallest + 3)
 
@@ -308,9 +309,9 @@ def main():
                     pdf.add_page()
                     pdf.subheading(depth, "Sampled input-output relation: each point is one sample, r is the correlation of the input with the output.")
                 elif n == 0:
-                    pdf.keep(folder, entry, 12)
+                    pdf.keep(figures, entry, 12)
                     pdf.subheading(depth)
-                pdf.image_at(folder, entry)
+                pdf.image_at(figures, entry)
 
     pdf.add_page()
     pdf.opener("RUN INFORMATION", SUMMARY, "Run information", "What produced this report, for reproducing and tracing it.")

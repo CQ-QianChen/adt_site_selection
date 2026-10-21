@@ -45,13 +45,13 @@ def with_times(items, propagation):
 
 
 def generate(propagation_path, sensitivity_path, geometry_path, scenario_path, output_dir, data=(), engine=None, scenario_hash=None, uq_hash=None, analysis_hash=None):
-    """Write stats.json, the figures listed in the analysis config and figures.json, an index of the figures for the report."""
+    """Write stats.json, the figures in figures/ as listed in the analysis config and figures.json, an index of them for the report."""
     scenario = yaml.safe_load(Path(scenario_path).read_text(encoding="utf-8"))
     config = scenario.get("analysis") or {}
     if set(config) - KEYS or not config.get("figures"):
         raise SystemExit(f"analysis config: keys are {sorted(KEYS)} and figures is required, got {sorted(config)}")
     out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
+    (out / "figures").mkdir(parents=True, exist_ok=True)
     propagation, sensitivity, layers = read_uq(propagation_path), read_uq(sensitivity_path), read_stratigraphy(geometry_path)
     qoi = config.get("qoi", {})
     raw_unit = propagation["qoi_unit"]
@@ -94,7 +94,7 @@ def generate(propagation_path, sensitivity_path, geometry_path, scenario_path, o
             raise SystemExit(f"analysis config: {name} has no option {sorted(unknown)}, options: {[k for k in parameters if k not in ('path', 'text', 'style')][1:]}")
         stem = re.sub(r"[^\w.-]+", "", "_".join([name] + [k + tag(item[k]) for k in ("depth", "times", "time") if k in item]))
         names[stem] = names.get(stem, 0) + 1
-        path = out / f"{stem}{'' if names[stem] == 1 else '_' + str(names[stem])}.png"
+        path = out / "figures" / f"{stem}{'' if names[stem] == 1 else '_' + str(names[stem])}.png"
         extra = {"rows": rows} if "rows" in parameters else {}
         if "units" in parameters:
             extra["units"] = units
