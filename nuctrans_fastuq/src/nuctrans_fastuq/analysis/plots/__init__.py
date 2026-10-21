@@ -9,7 +9,7 @@ REFERENCE_WIDTH = 12
 
 # defaults of every plot; the caller overrides any key through `style`
 STYLE = {"width": 160, "height": None, "font": None, "min_font": 10, "linewidth": 1, "median_lw": 3, "band": (5, 95), "bins": 20, "floor": 1e-3, "wrap": 12, "max_panels": 4,
-         "color": "#6B3580", "run_colors": ["#0072B2", "#E69F00", "#009E73", "#56B4E9", "#CC79A7", "#8C8C8C"], "threshold_color": "#B94A4A", "bar_color": "#B0B0B0", "kde_color": "#E2D0EA", "band_color": "#C9A8D6", "layer_colors": ["#bdc2b0", "#b0b8ae", "#a9b6c0", "#9babb6"], "sobol_cmap": "YlGnBu", "ridge_cmap": "magma", "ridge_range": (0.15, 0.85),
+         "color": "#6B3580", "threshold_color": "#B94A4A", "bar_color": "#B0B0B0", "kde_color": "#E2D0EA", "band_color": "#C9A8D6", "layer_colors": ["#bdc2b0", "#b0b8ae", "#a9b6c0", "#9babb6"], "sobol_cmap": "YlGnBu", "ridge_cmap": "magma", "ridge_range": (0.15, 0.85),
          "profile_aspect": 2.93, "gridsize": 30, "hexbin_cmap": "Purples", "dependence_aspect": 1, "dependence_columns": 3, "timeseries_inset": (0.2, 0.56, 0.36, 0.38), "profile_insets": [(0.28, 0.58, 1.29, 0.294), (0.28, 0.015, 1.29, 0.294)]}
 # words in the figures (where: replaces the depth in the title; title: template of the figure titles from where and the time); quantity, unit and qoi default to the names in the file, the caller overrides any key through `text` (qoi False: no top right text)
 TEXT = {"depth": "Depth [m]", "time": "Time [yr]", "stratigraphy": "Stratigraphy", "sobol": "Sobol {index} index", "where": None, "title": "{where}{time}", "band": "{low}-{high}%", "median": "median", "threshold": "threshold"}
