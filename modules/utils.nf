@@ -50,6 +50,19 @@ def analysisHash(config) {
     return computeHash8([analysis: config.analysis])
 }
 
+// the analysis folder in the datastore that a scenario file gives: the results of its current config, which must exist
+def analysisFolder(scenario_file, defaults, project_dir) {
+    def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(scenario_file).text) as Map
+    if( !yaml_config.name )
+        error "${scenario_file} needs a name"
+    def (config, surrogate_config, sampling_config) = mergeDefaults(yaml_config, defaults)
+    def (engine_name, engine_dir) = resolveEngine(config, config.name, surrogate_config, sampling_config, project_dir)
+    def folder = file("${project_dir}/datastore/${config.name}/${scenarioHash(config)}/decision_support/${uqHash(engine_name, config)}/analysis/${analysisHash(config)}")
+    if( !folder.exists() )
+        error "no results of ${scenario_file} in ${folder}: run the main workflow with it first"
+    return folder.toString()
+}
+
 // the engine to use: the one named in uq.engine, else the one the scenario and surrogate settings give (it may not exist yet)
 def resolveEngine(scenario_config, scenario_name, surrogate_config, sampling_config, project_dir) {
     def hash8 = scenarioHash(scenario_config)

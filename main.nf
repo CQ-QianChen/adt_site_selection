@@ -9,8 +9,8 @@ include { SURROGATE } from './modules/surrogate.nf'
 include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
 include { ANALYSIS } from './modules/analysis.nf'
-include { REPORT } from './modules/report.nf'
-include { mergeDefaults; resolveEngine; uqHash; analysisHash } from './modules/utils.nf'
+include { REPORT; COMPARE } from './modules/report.nf'
+include { mergeDefaults; resolveEngine; uqHash; analysisHash; analysisFolder } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -116,7 +116,8 @@ def defaultsConfig() {
     ]
 }
 
-workflow {
+// nextflow run main.nf --config_file scenario/Case3_Claystone.yaml
+workflow scenario {
     def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(params.config_file).text) as Map
     if( !yaml_config.name )
         error "${params.config_file} needs a name: it names the datastore folder of the scenario"
@@ -266,4 +267,27 @@ workflow {
             analysis_hash
         )
     }
+}
+
+// nextflow run main.nf --comparison_file comparison/Case3.yaml
+workflow compare {
+    def spec = new groovy.yaml.YamlSlurper().parseText(file(params.comparison_file).text) as Map
+    if( !spec.name || !spec.sites )
+        error "${params.comparison_file} needs a name and sites (label and scenario file of each)"
+    COMPARE(
+        file("$moduleDir/decision_support_report/compare.py"),
+        file("$moduleDir/decision_support_report/build.py"),
+        file("$moduleDir/decision_support_report/data/germany_states.geojson"),
+        spec.name,
+        spec.title ?: 'Site comparison',
+        spec.sites.collect { it.label },
+        spec.sites.collect { analysisFolder(it.scenario, defaultsConfig(), projectDir) }
+    )
+}
+
+workflow {
+    if( params.comparison_file )
+        compare()
+    else
+        scenario()
 }

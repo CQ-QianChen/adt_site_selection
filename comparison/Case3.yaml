@@ -1,0 +1,10 @@
+name: Case3
+title: Site comparison
+
+sites:
+  - label: Claystone
+    scenario: scenario/Case3_Claystone.yaml
+  - label: Crystalline
+    scenario: scenario/Case3_Crystalline.yaml
+  - label: Rock salt
+    scenario: scenario/Case3_Rocksalt.yaml

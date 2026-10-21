@@ -68,6 +68,10 @@ scenario's config), `COMMUNICATION_SDH` and `COMMUNICATION_NTD` (fetch
 site/rock/nuclide data), `SAMPLING` (draws parameter samples), and `MODEL`
 (runs the OGS ensemble).
 
+To compare scenarios that have been run, list their scenario files in a comparison file and run
+`nextflow run main.nf --comparison_file comparison/Case3.yaml`; the report is written to
+`datastore/comparisons/<name>/`.
+
 ### Datastore
 
 Every run publishes into `datastore/<case_name>/<hash8>/`:

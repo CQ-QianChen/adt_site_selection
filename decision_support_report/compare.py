@@ -145,7 +145,7 @@ def main():
         folder = Path(folder)
         scenario = yaml.safe_load((folder / "scenario.yaml").read_text(encoding="utf-8"))
         stats = json.loads((folder / "stats.json").read_text())
-        with h5py.File(folder.parent.parent / "propagation.h5") as f:
+        with h5py.File(folder.parent.parent / "propagation.h5") as f:  # the uq folder, two levels up in the datastore layout
             output, time, names, z = f["output/mean"][()] * stats["provenance"]["qoi_factor"], f["axes/time"][()], list(f["axes/depth"].asstr()[()]), f["axes/depth_z"][()]  # in the unit of the analysis
         region = simple(scenario["communication_sdh"]["tag_dict"]["location"][0])
         depths = {}  # location -> output over samples and time at its depth (a layer name or a depth in m)
