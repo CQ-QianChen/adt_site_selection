@@ -40,9 +40,14 @@ def engineName(surrogate_config, training_sampling_config, validation_sampling_c
     return "engine_${surrogate_config.type.toLowerCase()}_${surrogate_hash8}"
 }
 
-// one run: the engine, the uq options and the analysis block (its folder in decision_support)
-def runHash(engine_name, config) {
-    return computeHash8([engine: engine_name, sensitivity: config.uq.sensitivity_opts, propagation: config.uq.propagation_opts, analysis: config.analysis])
+// the uq results: the engine and the uq options (their folder in decision_support)
+def uqHash(engine_name, config) {
+    return computeHash8([engine: engine_name, sensitivity: config.uq.sensitivity_opts, propagation: config.uq.propagation_opts])
+}
+
+// the analysis of the uq results (its folder inside the uq folder)
+def analysisHash(config) {
+    return computeHash8([analysis: config.analysis])
 }
 
 // the engine to use: the one named in uq.engine, else the one the scenario and surrogate settings give (it may not exist yet)

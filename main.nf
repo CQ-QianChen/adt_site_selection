@@ -10,7 +10,7 @@ include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
 include { ANALYSIS } from './modules/analysis.nf'
 include { REPORT } from './modules/report.nf'
-include { mergeDefaults; resolveEngine; runHash } from './modules/utils.nf'
+include { mergeDefaults; resolveEngine; uqHash; analysisHash } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -143,7 +143,8 @@ workflow {
 
     // an engine already in the datastore is not trained again
     def (engine_name, engine_dir) = resolveEngine(scenario_config, scenario_name, surrogate_config, sampling_config, projectDir)
-    def run_hash = runHash(engine_name, scenario_config)
+    def uq_hash = uqHash(engine_name, scenario_config)
+    def analysis_hash = analysisHash(scenario_config)
     def engine = channel.value(engine_dir)
 
     if( !file("${engine_dir}/engine.h5").exists() ) {
@@ -222,7 +223,7 @@ workflow {
             scenario_config.uq.sensitivity_opts,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
-            run_hash,
+            uq_hash,
             engine
         )
     }
@@ -232,7 +233,7 @@ workflow {
             scenario_config.uq.propagation_opts,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
-            run_hash,
+            uq_hash,
             engine
         )
     }
@@ -245,7 +246,8 @@ workflow {
             scenario_config,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
-            run_hash,
+            uq_hash,
+            analysis_hash,
             engine,
             PROPAGATION.out.propagation,
             SENSITIVITY.out.sensitivity,
@@ -257,10 +259,10 @@ workflow {
             file("$moduleDir/report/build.py"),
             file("$moduleDir/report/fonts"),
             ANALYSIS.out.analysis,
-            ANALYSIS.out.scenario,
             scenario_name,
             CREATE_DATASTORE.out.hash8,
-            run_hash
+            uq_hash,
+            analysis_hash
         )
     }
 }

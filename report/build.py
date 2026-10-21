@@ -319,7 +319,7 @@ def main():
     pdf.add_page()
     pdf.opener("RUN INFORMATION", SUMMARY, "Run information", "What produced this report, for reproducing and tracing it.")
     sampling, provenance = surrogate.get("sampling", {}) if scenario else {}, stats.get("provenance", {})
-    identity = [("Scenario", head["scenario"].replace("_", " ")), ("Scenario hash", provenance.get("scenario_hash")), ("Run hash", provenance.get("run_hash")), ("Engine", f"{head['engine_name']} ({head['surrogate_type']})"), ("Output", f"{head['output_qoi']} [{unit}]")]
+    identity = [("Scenario", head["scenario"].replace("_", " ")), ("Scenario hash", provenance.get("scenario_hash")), ("UQ hash", provenance.get("uq_hash")), ("Analysis hash", provenance.get("analysis_hash")), ("Engine", f"{head['engine_name']} ({head['surrogate_type']})"), ("Output", f"{head['output_qoi']} [{unit}]")]
     samples = [(f"{name.capitalize()} samples", f"{v['sample_size']}, {v['sampling_method']}, seed {v['seed']}") for name, v in sampling.items() if isinstance(v, dict) and "sample_size" in v]
     y = pdf.get_y()
     left = settings(pdf, LEFT, y, 85, [("Identity", [row for row in identity if row[1]]), ("Dates", [("Engine computed", head["created"][:16].replace("T", " ")), ("Report generated", pdf.generated)])])

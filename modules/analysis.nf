@@ -2,14 +2,15 @@ include { toYaml } from './utils.nf'
 
 process ANALYSIS {
     conda "$projectDir/analysis/environment.yaml"
-    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/decision_support/${run_hash}" }, mode: 'copy'
+    publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/decision_support/${uq_hash}/analysis" }, mode: 'copy'
 
     input:
     path analyze
     val scenario_config
     val scenario_name
     val hash8
-    val run_hash
+    val uq_hash
+    val analysis_hash
     path engine_dir
     path propagation
     path sensitivity
@@ -18,12 +19,12 @@ process ANALYSIS {
     path nuclide_water_diffusivity_data
 
     output:
-    path "analysis", emit: analysis
-    path "scenario.yaml", emit: scenario
+    path "${analysis_hash}", emit: analysis
 
     script:
     """
-    echo "${toYaml(scenario_config)}" > scenario.yaml
+    mkdir ${analysis_hash}
+    echo "${toYaml(scenario_config)}" > ${analysis_hash}/scenario.yaml
 
     python ${analyze} \
       --propagation ${propagation} \
@@ -31,9 +32,10 @@ process ANALYSIS {
       --geometry ${geometry}/rock_interface.yaml \
       --data ${geometry} ${rock_data} ${nuclide_water_diffusivity_data} \
       --engine ${engine_dir} \
-      --scenario scenario.yaml \
+      --scenario ${analysis_hash}/scenario.yaml \
       --hash ${hash8} \
-      --run-hash ${run_hash} \
-      --output-dir analysis
+      --uq-hash ${uq_hash} \
+      --analysis-hash ${analysis_hash} \
+      --output-dir ${analysis_hash}
     """
 }
