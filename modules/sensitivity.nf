@@ -1,7 +1,7 @@
 include { toYaml } from './utils.nf'
 
 process SENSITIVITY {
-    conda "$projectDir/surrogate/environment.yaml"
+    conda "$projectDir/decision_support_uq/environment.yaml"
     publishDir { "$projectDir/datastore/${scenario_name}/${hash8}/decision_support/${uq_hash}" }, mode: 'copy'
 
     input:
