@@ -8,7 +8,10 @@ from .pylink.pylink import PyLinkForwardModel
 from .surrogate_models.meta_model import MetaModel
 from .surrogate_models.polynomial_chaos import PCE
 from .surrogate_models.gaussian_process_sklearn import GPESkl
-from .surrogate_models.gaussian_process_gpy import GPEGPy
+try:
+    from .surrogate_models.gaussian_process_gpy import GPEGPy
+except ImportError:  # torch and gpytorch are installed with the gp extra
+    pass
 from .surrogate_models.pce_gpr import PCEGPR
 from .surrogate_models.engine import Engine
 from .surrogate_models.inputs import Input
