@@ -6,3 +6,6 @@ dependencies:
   - fpdf2
   - pyyaml
   - pillow
+  - numpy
+  - matplotlib
+  - h5py
