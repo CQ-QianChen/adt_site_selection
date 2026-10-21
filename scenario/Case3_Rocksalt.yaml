@@ -150,8 +150,10 @@ uq:
 analysis:
   qoi:
     nuclide: I-129
-    quantity: Flux
-    threshold: 1.0e-5  # regulatory milestone, mol/(m2 year)
+    quantity: Flux ratio
+    factor: 0.03  # raw flux times factor, to be confirmed with the experts
+    unit: 1/year
+    threshold: 1.0e-7  # in the unit above, to be confirmed with the experts
   labels:
     "Host rock top": -1215
     "Host rock bottom": -1390
