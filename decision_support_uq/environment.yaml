@@ -5,5 +5,5 @@ dependencies:
   - python=3.11
   - pip
   - pip:
-      # After the package moves to its own repo, pin a tag as in model/environment.yaml (@v0.1.0).
-      - git+https://github.com/CQ-QianChen/adt_site_selection.git@main#subdirectory=nuctrans_fastuq
+      # main until the package has a release, then pin a tag as in model/environment.yaml.
+      - git+https://github.com/thealanjason/nuctrans_fastuq.git@main
