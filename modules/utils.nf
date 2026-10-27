@@ -50,6 +50,43 @@ def analysisHash(config) {
     return computeHash8([analysis: config.analysis.findAll { key, value -> !(key in ['figures', 'text', 'style', 'plot_options']) }])
 }
 
+// a comparison needs the same threshold (or none) for all sites: stops with what to change, before anything is looked up
+def checkThresholds(comparison_file, sites) {
+    def rows = sites.collect { site ->
+        def qoi = new groovy.yaml.YamlSlurper().parseText(file(site.scenario).text).analysis?.qoi
+        [site.label, site.scenario, qoi?.threshold == null ? null : qoi.threshold as double, qoi?.unit]
+    }
+    if( rows.collect { it[2] }.unique().size() == 1 )
+        return
+    def width = { column -> (rows.collect { it[column].toString() } + ['Site', 'Scenario file'][column]).collect { it.size() }.max() }
+    def table = rows.collect { label, scenario, threshold, unit ->
+        "  ${label.padRight(width(0))}  ${scenario.padRight(width(1))}  ${threshold == null ? 'none' : threshold.toString().toLowerCase() + (unit ? ' ' + unit : '')}"
+    }.join('\n')
+    def runs = rows.collect { "         nextflow run main.nf --config_file ${it[1]}" }.join('\n')
+    error """The comparison needs the same threshold for all sites.
+
+  ${'Site'.padRight(width(0))}  ${'Scenario file'.padRight(width(1))}  Threshold now
+${table}
+
+To continue:
+
+  1. Choose one threshold (or null for none) and set it in every scenario file above,
+     under analysis -> qoi:
+
+         analysis:
+           qoi:
+             threshold: 1.0e-7     # or: null
+
+  2. Run each scenario file again:
+
+${runs}
+
+  3. Run the comparison again:
+
+         nextflow run main.nf --comparison_file ${comparison_file}
+"""
+}
+
 // the analysis folder in the datastore that a scenario file gives: the results of its current config, which must exist
 def analysisFolder(scenario_file, defaults, project_dir) {
     def yaml_config = new groovy.yaml.YamlSlurper().parseText(file(scenario_file).text) as Map

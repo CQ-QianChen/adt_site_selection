@@ -10,7 +10,7 @@ include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
 include { ANALYSIS } from './modules/analysis.nf'
 include { REPORT; COMPARE } from './modules/report.nf'
-include { mergeDefaults; resolveEngine; uqHash; analysisHash; analysisFolder } from './modules/utils.nf'
+include { mergeDefaults; resolveEngine; uqHash; analysisHash; analysisFolder; checkThresholds } from './modules/utils.nf'
 
 def defaultsConfig() {
     return [
@@ -274,6 +274,7 @@ workflow compare {
     def spec = new groovy.yaml.YamlSlurper().parseText(file(params.comparison_file).text) as Map
     if( !spec.name || !spec.sites )
         error "${params.comparison_file} needs a name and sites (label and scenario file of each)"
+    checkThresholds(params.comparison_file, spec.sites)
     COMPARE(
         file("$moduleDir/decision_support_report/compare.py"),
         file("$moduleDir/decision_support_report/build.py"),
