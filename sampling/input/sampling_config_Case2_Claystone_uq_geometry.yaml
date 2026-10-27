@@ -1,5 +1,0 @@
-uncertain_parameters:
-  geometry:
-    rock_interface:
-      - Aptian_bottom
-      - Host_rock_bottom
