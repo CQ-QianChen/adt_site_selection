@@ -55,7 +55,8 @@ def generate(propagation_path, sensitivity_path, geometry_path, scenario_path, o
     propagation, sensitivity, layers = read_uq(propagation_path), read_uq(sensitivity_path), read_stratigraphy(geometry_path)
     qoi = config.get("qoi", {})
     raw_unit = propagation["qoi_unit"]
-    propagation["output/mean"] = propagation["output/mean"] * qoi.get("factor", 1)  # the QoI in the unit of the analysis, the threshold is in this unit too
+    factor = qoi.get("factor") or 1  # null or no factor: the raw output
+    propagation["output/mean"] = propagation["output/mean"] * factor  # the QoI in the unit of the analysis, the threshold is in this unit too
     propagation["qoi_unit"] = qoi.get("unit", raw_unit)
     text = {"qoi": False, "title": "{time}", **({"quantity": qoi["quantity"]} if "quantity" in qoi else {}), **config.get("text", {})}  # the report names the QoI, the figures do not repeat it
     common = {"text": text, "style": {"font": 10, "width": 130, **config.get("style", {})}}  # one font size and a width that fits the page, figures are placed at their size
@@ -78,7 +79,7 @@ def generate(propagation_path, sensitivity_path, geometry_path, scenario_path, o
                 key = numeric[min(numeric, key=lambda value: abs(value - z))]
             values = np.array(r2[key], dtype=float)
             stats["validation"][name] = {"r2_min": float(np.nanmin(values)), "r2_mean": float(np.nanmean(values))}
-    stats["provenance"] = {"qoi_factor": qoi.get("factor", 1), "raw_unit": raw_unit, "scenario_hash": scenario_hash, "uq_hash": uq_hash, "analysis_hash": analysis_hash, "data": {Path(folder).name: hashlib.sha256(b"".join(f.read_bytes() for f in sorted(Path(folder).rglob("*")) if f.is_file())).hexdigest()[:8] for folder in data}}
+    stats["provenance"] = {"qoi_factor": factor, "raw_unit": raw_unit, "scenario_hash": scenario_hash, "uq_hash": uq_hash, "analysis_hash": analysis_hash, "data": {Path(folder).name: hashlib.sha256(b"".join(f.read_bytes() for f in sorted(Path(folder).rglob("*")) if f.is_file())).hexdigest()[:8] for folder in data}}
     (out / "stats.json").write_text(json.dumps(stats, indent=2, default=lambda value: value.item()), encoding="utf-8")
 
     for item in with_times(expand(config["figures"]), propagation):
