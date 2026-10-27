@@ -1,4 +1,5 @@
 .*
+!.github/
 openspec**
 datastore**
 figure/outputs/
