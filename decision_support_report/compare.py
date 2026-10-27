@@ -190,15 +190,19 @@ def main():
             d, t = run["stats"]["depths"][location], run["stats"]["depths"][location].get("threshold")
             top = next(iter(drivers(d)), None)
             r2 = run["stats"].get("validation", {}).get(location)
-            rows.append([run["label"], sci(d["peak"]["median"]), sci(d["peak"]["high"]), f"{t['share'] * 100:.0f} %" if t else "-", ("never" if t["p95_exceeds"] is None else f"{sci(t['p95_exceeds'], 0)} yr") if t else "-",
-                         f"{r2['r2_min']:.3f}" if r2 else "-", top["label"] if top else "-"])
-        table(pdf, (30, 24, 24, 24, 26, 18, 34), ["Site", "Median peak", "95th percentile", "Above threshold", "P95 above from", "R2 min", "Most sensitive"], rows)
+            rows.append([run["label"], sci(d["peak"]["median"]), sci(d["peak"]["high"])]
+                        + ([f"{t['share'] * 100:.0f} %", "never" if t["p95_exceeds"] is None else f"{sci(t['p95_exceeds'], 0)} yr"] if threshold else [])
+                        + [f"{r2['r2_min']:.3f}" if r2 else "-", top["label"] if top else "-"])
+        if threshold:
+            table(pdf, (30, 24, 24, 24, 26, 18, 34), ["Site", "Median peak", "95th percentile", "Above threshold", "P95 above from", "R2 min", "Most sensitive"], rows)
+        else:
+            table(pdf, (30, 30, 30, 24, 66), ["Site", "Median peak", "95th percentile", "R2 min", "Most sensitive"], rows)
         pdf.ln(2)
     pdf.subheading("Runs", "The runs behind this comparison.")
     table(pdf, (30, 50, 25, 25, 25, 25), ["Site", "Scenario", "Scenario hash", "UQ hash", "Analysis hash", "Conversion"],
           [[run["label"], run["stats"]["header"]["scenario"], p["scenario_hash"], p["uq_hash"], p["analysis_hash"], f"x {p['qoi_factor']:g}" if p["qoi_factor"] != 1 else "none"] for run in ranked for p in [run["stats"]["provenance"]]], 6)
     pdf.add_page()
-    pdf.opener("PREDICTION", PREDICTION, "Predicted flux over time", "Median (line) and 5-95 % band of the sites on shared axes, as magnitudes; the dotted red line is the threshold.")
+    pdf.opener("PREDICTION", PREDICTION, "Predicted flux over time", "Median (line) and 5-95 % band of the sites on shared axes, as magnitudes" + ("; the dotted red line is the threshold." if threshold else "."))
     for location, path in figures.items():
         pdf.subheading(location)
         pdf.image_at(out, {"file": path})
