@@ -269,7 +269,7 @@ workflow scenario {
     }
 }
 
-// nextflow run main.nf --comparison_file comparison/Case3.yaml
+// nextflow run main.nf --comparison_file scenario/comparison/Case3.yaml
 workflow compare {
     def spec = new groovy.yaml.YamlSlurper().parseText(file(params.comparison_file).text) as Map
     if( !spec.name || !spec.sites )
