@@ -45,9 +45,9 @@ def uqHash(engine_name, config) {
     return computeHash8([engine: engine_name, sensitivity: config.uq.sensitivity_opts, propagation: config.uq.propagation_opts])
 }
 
-// the analysis of the uq results (its folder inside the uq folder)
+// the analysis of the uq results (its folder inside the uq folder); the figures and their look do not change a number, so a new plot goes into the same folder
 def analysisHash(config) {
-    return computeHash8([analysis: config.analysis])
+    return computeHash8([analysis: config.analysis.findAll { key, value -> !(key in ['figures', 'text', 'style', 'plot_options']) }])
 }
 
 // the analysis folder in the datastore that a scenario file gives: the results of its current config, which must exist
