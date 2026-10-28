@@ -35,7 +35,8 @@ conda env create -f environment.yml
 conda activate adt_site_selection
 ```
 
-Nextflow builds and caches the conda environment of each process on first run.
+Nextflow builds and caches the conda environment of each process on first run. To run in containers instead
+(see below), Docker or Apptainer must be installed.
 
 ### Running a scenario
 
@@ -43,15 +44,32 @@ Nextflow builds and caches the conda environment of each process on first run.
 nextflow run main.nf --config_file scenario/Case3_Claystone.yaml
 ```
 
-Any file in [`scenario/`](./scenario/) can be passed. The workflow in [`main.nf`](./main.nf) runs the following steps in order:
+Any file in [`scenario/`](./scenario/) can be passed.
+
+Each step can also run in the container image of its module instead of a conda environment. The images fix every
+package version, so the software is the same on every machine. With Docker:
+
+```bash
+nextflow run main.nf --config_file scenario/Case3_Claystone.yaml --containerized
+```
+
+With Apptainer:
+
+```bash
+nextflow run main.nf --config_file scenario/Case3_Claystone.yaml --containerized -profile apptainer
+```
+
+The workflow in [`main.nf`](./main.nf) runs the following steps in order:
 
 | Step | Does | Runs |
 |------|------|------|
 | `CREATE_DATASTORE` | records the configuration of the scenario | always |
 | `COMMUNICATION_SDH`, `COMMUNICATION_NTD` | fetch the site, rock and nuclide data | always |
 | `SAMPLING`, `MODEL`, `SURROGATE` | draw the training and validation datasets, run the OGS ensemble, train the surrogate | if there is no surrogate engine yet |
-| `SENSITIVITY`, `PROPAGATION` | compute the Sobol indices, propagate the input uncertainty | if the scenario asks for them |
+| `SENSITIVITY`, `PROPAGATION` | compute the Sobol indices, propagate the input uncertainty | if the scenario asks for them and their results are not in the datastore yet |
 | `ANALYSIS`, `REPORT` | compute the statistics, draw the figures, write the PDF report | if the scenario describes an analysis |
+
+The results are written to `datastore/`, see [Results and datastore](#results-and-datastore).
 
 ### Scenario file
 
@@ -67,7 +85,17 @@ Any file in [`scenario/`](./scenario/) can be passed. The workflow in [`main.nf`
 | `uq` | which uncertainty analyses to run (sensitivity, propagation) |
 | `analysis` | what the report shows, for example the threshold and the locations. It can be changed without recomputing the surrogate |
 
-### Datastore
+### Comparing scenarios
+
+```bash
+nextflow run main.nf --comparison_file scenario/comparison/Case3.yaml
+```
+
+The comparison file lists the scenario files of the sites. Each of these scenarios needs to be run first, with its
+analysis. All sites need the same threshold (`analysis.qoi.threshold`), or none. Otherwise the run stops and says what
+to change. The report is written to `datastore/comparisons/<name>/`.
+
+### Results and datastore
 
 Results are written to `datastore/`:
 
@@ -95,25 +123,6 @@ config behind it is unchanged:
 
 For example, changing the `threshold` in the [`analysis`](#scenario-file) block of the scenario
 file gives a new analysis folder; the surrogate engine and the UQ results are reused.
-
-### Running in containers
-
-```bash
-nextflow run main.nf --config_file scenario/Case3_Claystone.yaml --containerized
-```
-
-Each step runs in the container image of its module instead of a conda environment. The images fix every package version,
-so the software is the same on every machine. `-profile apptainer` uses Apptainer instead of Docker.
-
-### Comparing scenarios
-
-```bash
-nextflow run main.nf --comparison_file scenario/comparison/Case3.yaml
-```
-
-The comparison file lists the scenario files of the sites. All sites need the same threshold
-(`analysis.qoi.threshold`), or none. Otherwise the run stops and says what to change.
-The report is written to `datastore/comparisons/<name>/`.
 
 ### Sharing the datastore
 
