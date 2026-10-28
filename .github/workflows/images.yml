@@ -1,30 +1,101 @@
 name: Module images
 
-# Builds the image of every module from <module>/Dockerfile and pushes it to
-# ghcr.io/<repo>/<module>, tagged main and with the commit, for --containerized runs.
-# Each platform is built on a native runner and pushed by digest; the merge job puts
-# the platforms of a module into one tag. A module has an arm64 image when its
-# conda-lock.yml has linux-aarch64 (communication_sdh and model do not).
+# lock:  locks the modules whose environment.yaml changed and commits the lock
+#        (all modules on a manual run with relock_all). Only this job runs on a pull request.
+# build: one image per module and platform, on a native runner. Not for pull requests.
+# merge: joins the platforms of a module into the tags main and sha-<commit>
+#        on ghcr.io/<repo>/<module>.
+# Only modules with linux-aarch64 in their lock get an arm64 image (not communication_sdh, model).
 
 on:
   push:
     branches: [main]
     paths:
+      - '*/environment.yaml'
       - '*/Dockerfile'
       - '*/conda-lock.yml'
       - '.github/workflows/images.yml'
+  pull_request:
+    paths:
+      - '*/environment.yaml'
   workflow_dispatch:
+    inputs:
+      relock_all:
+        description: Lock every module again, for example to pick up a moved git dependency
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  lock:
+    # a pull request from a fork cannot be pushed to
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Find the modules to lock
+        id: find
+        run: |
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then
+            if [ "${{ inputs.relock_all }}" = true ]; then
+              modules=$(ls */environment.yaml | cut -d/ -f1 | grep -vx figure)
+            else
+              modules=
+            fi
+          else
+            if [ "${{ github.event_name }}" = pull_request ]; then
+              before="${{ github.event.pull_request.base.sha }}"
+            else
+              before="${{ github.event.before }}"
+            fi
+            if git cat-file -e "$before" 2>/dev/null; then
+              modules=$(git diff --name-only "$before"...HEAD | { grep -E '^[^/]+/environment\.yaml$' || true; } | cut -d/ -f1 | grep -vx figure || true)
+            else
+              modules=
+            fi
+          fi
+          echo "modules=$(echo $modules)" >> "$GITHUB_OUTPUT"
+
+      - uses: conda-incubator/setup-miniconda@v3
+        if: steps.find.outputs.modules != ''
+        with:
+          miniforge-version: latest
+          auto-activate-base: true
+
+      - name: Lock
+        if: steps.find.outputs.modules != ''
+        shell: bash -el {0}
+        run: |
+          conda install -y conda-lock
+          bash .github/scripts/update-locks.sh ${{ steps.find.outputs.modules }}
+
+      - name: Commit the locks
+        if: steps.find.outputs.modules != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add '*/conda-lock.yml'
+          if ! git diff --staged --quiet; then
+            git commit -m "update the locks"
+            git push
+          fi
+
   build:
+    needs: lock
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -49,6 +120,8 @@ jobs:
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.module }}" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - uses: docker/setup-buildx-action@v3
 
