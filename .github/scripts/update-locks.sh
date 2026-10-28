@@ -5,7 +5,6 @@
 # Requires conda-lock and micromamba on PATH. Run from the repo root.
 set -euo pipefail
 
-# model: the OGS and gmsh wheels have no linux-aarch64 build; communication_sdh: neither has vtk 9.4.2
 platforms() {
   case "$1" in
     model|communication_sdh) echo "-p linux-64" ;;
