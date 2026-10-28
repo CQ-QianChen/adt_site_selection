@@ -102,17 +102,8 @@ file gives a new analysis folder; the surrogate engine and the UQ results are re
 nextflow run main.nf --config_file scenario/Case3_Claystone.yaml --containerized
 ```
 
-Each step then runs in the image of its module, `ghcr.io/cq-qianchen/adt_site_selection/<module>:main`,
-instead of its conda environment. Docker is the default engine; `-profile apptainer` uses Apptainer with the
-same images. `--imageTag` picks another tag.
-
-The image of a module is built from its `<module>/Dockerfile` and `<module>/conda-lock.yml` by the
-[workflow](./.github/workflows/images.yml) on every push to `main`. The workflow also locks a module again
-when its `environment.yaml` changes. To lock by hand: `bash .github/scripts/update-locks.sh <module>`.
-
-The conda environments are not pinned, so a conda run can differ between machines and over time. The images are.
-`model` and `communication_sdh` have no arm64 image (their packages have no linux-aarch64 build), so on an
-Arm Mac Docker runs them emulated.
+Each step runs in the container image of its module instead of a conda environment. The images fix every package version,
+so the software is the same on every machine. `-profile apptainer` uses Apptainer instead of Docker.
 
 ### Comparing scenarios
 
