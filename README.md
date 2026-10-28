@@ -114,3 +114,15 @@ nextflow run main.nf --comparison_file scenario/comparison/Case3.yaml
 The comparison file lists the scenario files of the sites. All sites need the same threshold
 (`analysis.qoi.threshold`), or none. Otherwise the run stops and says what to change.
 The report is written to `datastore/comparisons/<name>/`.
+
+### Sharing the datastore
+
+```bash
+nextflow run main.nf --sync_datastore
+```
+
+Synchronizes `datastore/` with the remote datastore on Zenodo. Results of earlier runs that are available there are
+downloaded and reused by subsequent runs instead of being recomputed. Results of new local runs are uploaded as a
+draft, which you then publish on Zenodo.
+
+Uploading needs the token of a Zenodo account with edit access, saved in `sync/.token`.

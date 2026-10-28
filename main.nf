@@ -10,6 +10,7 @@ include { SENSITIVITY } from './modules/sensitivity.nf'
 include { PROPAGATION } from './modules/propagation.nf'
 include { ANALYSIS } from './modules/analysis.nf'
 include { REPORT; COMPARE } from './modules/report.nf'
+include { SYNC } from './modules/sync.nf'
 include { mergeDefaults; resolveEngine; uqHash; analysisHash; analysisFolder; checkThresholds } from './modules/utils.nf'
 
 def defaultsConfig() {
@@ -221,7 +222,12 @@ workflow scenario {
         engine = SURROGATE.out.engine
     }
 
-    if( scenario_config.uq.sensitivity ) {
+    // uq results already in the datastore are not computed again
+    def uq_dir = "${engine_dir.parent.parent}/decision_support/${uq_hash}"
+    def sensitivity = channel.value(file("${uq_dir}/sensitivity.h5"))
+    def propagation = channel.value(file("${uq_dir}/propagation.h5"))
+
+    if( scenario_config.uq.sensitivity && !file("${uq_dir}/sensitivity.h5").exists() ) {
         SENSITIVITY(
             scenario_config.uq.sensitivity_opts,
             scenario_name,
@@ -229,9 +235,10 @@ workflow scenario {
             uq_hash,
             engine
         )
+        sensitivity = SENSITIVITY.out.sensitivity
     }
 
-    if( scenario_config.uq.propagation ) {
+    if( scenario_config.uq.propagation && !file("${uq_dir}/propagation.h5").exists() ) {
         PROPAGATION(
             scenario_config.uq.propagation_opts,
             scenario_name,
@@ -239,6 +246,7 @@ workflow scenario {
             uq_hash,
             engine
         )
+        propagation = PROPAGATION.out.propagation
     }
 
     if( scenario_config.analysis ) {
@@ -252,8 +260,8 @@ workflow scenario {
             uq_hash,
             analysis_hash,
             engine,
-            PROPAGATION.out.propagation,
-            SENSITIVITY.out.sensitivity,
+            propagation,
+            sensitivity,
             COMMUNICATION_SDH.out.geometry,
             COMMUNICATION_SDH.out.rock_data,
             COMMUNICATION_NTD.out.nuclide_water_diffusivity_data
@@ -286,9 +294,16 @@ workflow compare {
     )
 }
 
+// nextflow run main.nf --sync_datastore
+workflow sync_datastore {
+    SYNC("${projectDir}/datastore", params.zenodo_record, params.zenodo_url)
+}
+
 workflow {
     if( params.comparison_file )
         compare()
+    else if( params.sync_datastore )
+        sync_datastore()
     else
         scenario()
 }
