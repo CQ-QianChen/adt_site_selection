@@ -106,6 +106,14 @@ if not changed:
     print('up to date')
     sys.exit()
 
+if not TOKEN:
+    print('No Zenodo token found, so the datastore was only pulled.')
+    print('These local results are not on Zenodo and were not uploaded:')
+    for key in changed:
+        print(f'  {key}')
+    print('To upload them, set ZENODO_TOKEN or save the token in sync/.token.')
+    sys.exit()
+
 if args.record:  # Zenodo allows one draft per record
     concept = call(f'{URL}/api/deposit/depositions/{args.record}')['conceptrecid']
     for d in call(f'{URL}/api/deposit/depositions?status=draft'):
