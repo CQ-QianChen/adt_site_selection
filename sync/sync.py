@@ -39,11 +39,21 @@ def call(url, method='GET', body=None, ctype='application/json', size=None):
         sys.exit(f'{method} {url}: {e.code} {e.read().decode()[:300]}')
 
 
+class NoAuthRedirect(urllib.request.HTTPRedirectHandler):
+    """a redirect may lead to another host: the token is not sent there"""
+
+    def redirect_request(self, *args):
+        request = super().redirect_request(*args)
+        if request:
+            request.headers.pop('Authorization', None)
+        return request
+
+
 class RemoteFile:
     """a file on the web that zipfile can read: every read is a range request"""
 
-    def __init__(self, url, size):
-        self.url, self.size, self.pos = url, size, 0
+    def __init__(self, url, size, headers=None):
+        self.url, self.size, self.headers, self.pos = url, size, headers or {}, 0
 
     def tell(self):
         return self.pos
@@ -56,7 +66,8 @@ class RemoteFile:
         end = self.size if n < 0 else min(self.pos + n, self.size)
         if self.pos >= end:
             return b''
-        with urllib.request.urlopen(urllib.request.Request(self.url, headers={'Range': f'bytes={self.pos}-{end - 1}'})) as r:
+        range = {'Range': f'bytes={self.pos}-{end - 1}'}
+        with urllib.request.build_opener(NoAuthRedirect).open(urllib.request.Request(self.url, headers={**self.headers, **range})) as r:
             data = r.read()
         self.pos = end
         return data
@@ -131,11 +142,15 @@ def push(ds, record, changed):
             draft = call(call(f'{URL}/api/deposit/depositions/{record}/actions/newversion', 'POST')['links']['latest_draft'])
     else:
         draft = call(f'{URL}/api/deposit/depositions', 'POST', {})
-    old = {f['filename']: f['id'] for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")}
+    old = {f['filename']: f for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")}
     with tempfile.TemporaryDirectory() as tmp:
         for key, (case, files) in changed.items():
-            if key in old:
-                call(f"{URL}/api/deposit/depositions/{draft['id']}/files/{old[key]}", 'DELETE')
+            if key in old:  # a zip of the draft that already has all these files is left as it is
+                draft_zip = RemoteFile(f"{draft['links']['bucket']}/{key}", int(old[key]['filesize']), {'Authorization': f'Bearer {TOKEN}'})
+                if files.items() <= {i.filename: i.CRC for i in zipfile.ZipFile(draft_zip).infolist()}.items():
+                    print(f'in the draft already: {case}  {labels(files)}')
+                    continue
+                call(f"{URL}/api/deposit/depositions/{draft['id']}/files/{old[key]['id']}", 'DELETE')
             with zipfile.ZipFile(f'{tmp}/{key}', 'w', zipfile.ZIP_DEFLATED) as z:
                 for path in files:
                     z.write(f'{ds}/{path}', path)
