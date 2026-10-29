@@ -1,6 +1,7 @@
 // runs on the machine itself: sync.py needs only python3, and the token (sync/.token or $ZENODO_TOKEN) stays out of the images
 process SYNC {
     cache false
+    debug true
 
     input:
     val datastore
