@@ -94,7 +94,7 @@ for f in latest:  # published records are public: no token is sent to the downlo
             with zipfile.ZipFile(tmp.name) as z:
                 for path in missing:
                     z.extract(path, ds)
-                    print('pulled', path)
+            print(f"pulled {f['key'][:-4]}: {len(missing)} files")
 
 # push: the cases that have files the record does not, or other ones
 changed = {}
