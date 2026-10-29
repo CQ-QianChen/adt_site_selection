@@ -125,7 +125,7 @@ def changes(ds, remote):
         model = {path: crc for path, crc in files.items() if '/model_results/' in path}
         name = case.replace('/', '_')
         for key, part in ((f'{name}.zip', {p: c for p, c in files.items() if p not in model}), (f'{name}_model_results.zip', model)):
-            if part and part != remote.get(key):
+            if part and not part.items() <= remote.get(key, {}).items():
                 changed[key] = (case, part)
     return changed
 
