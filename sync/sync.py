@@ -1,10 +1,11 @@
 """Sync the datastore with a Zenodo record: pull what is only there, push what is only here.
 
-The record holds one zip per case folder (<name>/<hash8>) with the datastore tree inside.
+The record holds one zip per case folder (<name>/<hash8>) with the datastore tree inside, and one more with its
+model runs (model_results/), which are only pulled with --model-results.
 A push makes a new version of the record as a draft; publish it in the Zenodo web page.
 The token is read from $ZENODO_TOKEN or sync/.token; without one you can only pull.
 
-python sync.py <datastore> [--record <id>]
+python sync.py <datastore> [--record <id>] [--model-results]
 """
 import argparse
 import glob
@@ -74,18 +75,28 @@ def crcs(datastore, case):
     return out
 
 
+def labels(paths):
+    """what a set of files gives the workflow"""
+    found = {'model': '/model_results/', 'surrogate': '/engine.h5', 'uq': '/sensitivity.h5',
+             'report': '/report.pdf', 'comparison': '/comparison.pdf'}
+    return ', '.join(label for label, part in found.items() if any(part in '/' + p for p in paths))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('datastore')
 parser.add_argument('--record')
+parser.add_argument('--model-results', action='store_true', help='also pull the model runs')
 args = parser.parse_args()
 ds = args.datastore
 
-# pull: the files only the record has
-remote = {}
+# pull: the files only the record has, without the model runs unless asked for
+remote, pulled = {}, {}
 latest = call(f'{URL}/api/records/{args.record}/versions/latest')['files'] if args.record else []
 for f in latest:  # published records are public: no token is sent to the download
     url = f['links']['self']
     remote[f['key']] = {i.filename: i.CRC for i in zipfile.ZipFile(RemoteFile(url, f['size'])).infolist()}
+    if f['key'].endswith('_model_results.zip') and not args.model_results:
+        continue
     missing = [path for path in remote[f['key']] if not os.path.exists(f'{ds}/{path}')]
     if missing:  # one download of the zip is far fewer requests than one per file
         with tempfile.NamedTemporaryFile() as tmp:
@@ -94,23 +105,30 @@ for f in latest:  # published records are public: no token is sent to the downlo
             with zipfile.ZipFile(tmp.name) as z:
                 for path in missing:
                     z.extract(path, ds)
-            print(f"pulled {f['key'][:-4]}: {len(missing)} files")
+                    pulled.setdefault('/'.join(path.split('/')[:2]), []).append(path)
+if pulled:
+    print('Pulled from Zenodo:')
+    for case, paths in pulled.items():
+        print(f'  {case:<{max(map(len, pulled))}}  {labels(paths)}'.rstrip())
 
-# push: the cases that have files the record does not, or other ones
+# push: the cases that have files the record does not, or other ones; no model runs here is no change
 changed = {}
 for case in sorted(os.path.relpath(p, ds) for p in glob.glob(f'{ds}/*/*') if os.path.isdir(p)):
-    key, files = case.replace('/', '_') + '.zip', crcs(ds, case)
-    if files != remote.get(key):
-        changed[key] = files
+    files = crcs(ds, case)
+    model = {path: crc for path, crc in files.items() if '/model_results/' in path}
+    for key, part in ((case.replace('/', '_') + '.zip', {p: c for p, c in files.items() if p not in model}),
+                      (case.replace('/', '_') + '_model_results.zip', model)):
+        if part and part != remote.get(key):
+            changed[key] = (case, part)
 if not changed:
-    print('up to date')
+    print('Nothing to upload.' if pulled else 'The datastore and Zenodo are in sync.')
     sys.exit()
 
 if not TOKEN:
     print('No Zenodo token found, so the datastore was only pulled.')
     print('These local results are not on Zenodo and were not uploaded:')
-    for key in changed:
-        print(f'  {key}')
+    for case in sorted({case for case, _ in changed.values()}):
+        print(f'  {case}')
     print('To upload them, set ZENODO_TOKEN or save the token in sync/.token.')
     sys.exit()
 
@@ -124,7 +142,7 @@ else:
     draft = call(f'{URL}/api/deposit/depositions', 'POST', {})
 old = {f['filename']: f['id'] for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")}
 with tempfile.TemporaryDirectory() as tmp:
-    for key, files in changed.items():
+    for key, (case, files) in changed.items():
         if key in old:
             call(f"{URL}/api/deposit/depositions/{draft['id']}/files/{old[key]}", 'DELETE')
         with zipfile.ZipFile(f'{tmp}/{key}', 'w', zipfile.ZIP_DEFLATED) as z:
@@ -132,5 +150,5 @@ with tempfile.TemporaryDirectory() as tmp:
                 z.write(f'{ds}/{path}', path)
         with open(f'{tmp}/{key}', 'rb') as f:
             call(f"{draft['links']['bucket']}/{key}", 'PUT', f, 'application/octet-stream', os.path.getsize(f'{tmp}/{key}'))
-        print('pushed', key)
+        print(f'pushed {case}  {labels(files)}')
 print(f"draft {draft['id']}: publish it at {draft['links']['html']}")

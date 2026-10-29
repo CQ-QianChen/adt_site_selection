@@ -7,9 +7,10 @@ process SYNC {
     val datastore
     val record
     val url
+    val model_results
 
     script:
     """
-    ZENODO_URL=${url} python3 ${projectDir}/sync/sync.py ${datastore} ${record ? "--record ${record}" : ''}
+    ZENODO_URL=${url} python3 ${projectDir}/sync/sync.py ${datastore} ${record ? "--record ${record}" : ''} ${model_results ? '--model-results' : ''}
     """
 }

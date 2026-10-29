@@ -294,9 +294,9 @@ workflow compare {
     )
 }
 
-// nextflow run main.nf --sync_datastore
+// nextflow run main.nf --sync_datastore [--model_results]
 workflow sync_datastore {
-    SYNC("${projectDir}/datastore", params.zenodo_record, params.zenodo_url)
+    SYNC("${projectDir}/datastore", params.zenodo_record, params.zenodo_url, params.model_results)
 }
 
 workflow {

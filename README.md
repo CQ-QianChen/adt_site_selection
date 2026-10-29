@@ -134,4 +134,6 @@ Synchronizes `datastore/` with the remote datastore on Zenodo. Results of earlie
 downloaded and reused by subsequent runs instead of being recomputed. Results of new local runs are uploaded as a
 draft, which you then publish on Zenodo.
 
+The model runs (`model_results/`) are large and only downloaded with `--model_results`. Uploads always include them.
+
 Uploading needs the token of a Zenodo account with edit access, saved in `sync/.token`.
