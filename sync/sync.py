@@ -2,7 +2,8 @@
 
 The record holds one zip per case folder (<name>/<hash8>) with the datastore tree inside, and one more with its
 model runs (model_results/), which are only pulled with --model-results.
-A push makes a new version of the record as a draft; publish it in the Zenodo web page.
+A push goes into the open draft of the record, or makes a new version as a draft; publish it in the Zenodo web page.
+With a token, a pull reads that draft too: it is newer than the published version.
 The token is read from $ZENODO_TOKEN or sync/.token; without one you can only pull.
 
 python sync.py <datastore> [--record <id>] [--model-results]
@@ -49,6 +50,9 @@ class NoAuthRedirect(urllib.request.HTTPRedirectHandler):
         return request
 
 
+OPEN = urllib.request.build_opener(NoAuthRedirect).open
+
+
 class RemoteFile:
     """a file on the web that zipfile can read: every read is a range request"""
 
@@ -67,7 +71,7 @@ class RemoteFile:
         if self.pos >= end:
             return b''
         range = {'Range': f'bytes={self.pos}-{end - 1}'}
-        with urllib.request.build_opener(NoAuthRedirect).open(urllib.request.Request(self.url, headers={**self.headers, **range})) as r:
+        with OPEN(urllib.request.Request(self.url, headers={**self.headers, **range})) as r:
             data = r.read()
         self.pos = end
         return data
@@ -93,28 +97,45 @@ def labels(paths):
     return ', '.join(label for label, part in found.items() if any(part in '/' + p for p in paths))
 
 
+def open_draft(record):
+    """the open draft of the record, which Zenodo allows only one of, or None; only its owner can see it"""
+    if record and TOKEN:
+        concept = call(f'{URL}/api/records/{record}')['conceptrecid']  # public: a token of another account can pull too
+        drafts = [d for d in call(f'{URL}/api/deposit/depositions?status=draft&size=100') if d['conceptrecid'] == concept and not d['submitted']]
+        return call(drafts[0]['links']['self']) if drafts else None
+
+
 def pull(ds, record, with_model):
-    """download what only the record has; returns the zips of the record: name -> {path in the datastore: crc32}"""
+    """download what only the record has, from its open draft if there is one, else from the last published version.
+    returns the zips there, name -> {path in the datastore: crc32}, whether anything was pulled, and the draft"""
+    draft = open_draft(record)
+    if draft:  # the zips of a draft are only for its owner: the token is sent
+        auth = {'Authorization': f'Bearer {TOKEN}'}
+        zips = [(f['filename'], f"{draft['links']['bucket']}/{f['filename']}", int(f['filesize']), auth)
+                for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")]
+    else:  # published records are public: no token is sent to the download
+        zips = [(f['key'], f['links']['self'], f['size'], {}) for f in call(f'{URL}/api/records/{record}/versions/latest')['files']] if record else []
     remote, pulled = {}, {}
-    for f in call(f'{URL}/api/records/{record}/versions/latest')['files'] if record else []:
-        url = f['links']['self']  # published records are public: no token is sent to the download
-        remote[f['key']] = {i.filename: i.CRC for i in zipfile.ZipFile(RemoteFile(url, f['size'])).infolist()}
-        if f['key'].endswith('_model_results.zip') and not with_model:
+    for key, url, size, headers in zips:
+        if not key.endswith('.zip'):
             continue
-        missing = [path for path in remote[f['key']] if not os.path.exists(f'{ds}/{path}')]
+        remote[key] = {i.filename: i.CRC for i in zipfile.ZipFile(RemoteFile(url, size, headers)).infolist()}
+        if key.endswith('_model_results.zip') and not with_model:
+            continue
+        missing = [path for path in remote[key] if not os.path.exists(f'{ds}/{path}')]
         if missing:  # one download of the zip is far fewer requests than one per file
             with tempfile.NamedTemporaryFile() as tmp:
-                with urllib.request.urlopen(url) as r:
+                with OPEN(urllib.request.Request(url, headers=headers)) as r:
                     shutil.copyfileobj(r, tmp)
                 with zipfile.ZipFile(tmp.name) as z:
                     for path in missing:
                         z.extract(path, ds)
                         pulled.setdefault('/'.join(path.split('/')[:2]), []).append(path)
     if pulled:
-        print('Pulled from Zenodo:')
+        print(f"Pulled from the open draft {draft['id']}:" if draft else 'Pulled from Zenodo:')
         for case, paths in pulled.items():
             print(f'  {case:<{max(map(len, pulled))}}  {labels(paths)}'.rstrip())
-    return remote, bool(pulled)
+    return remote, bool(pulled), draft
 
 
 def changes(ds, remote):
@@ -130,30 +151,25 @@ def changes(ds, remote):
     return changed
 
 
-def push(ds, record, changed):
-    """upload the changed zips into a draft of the record, a new one unless the record has an open draft (Zenodo allows one)"""
-    if record:
-        concept = call(f'{URL}/api/deposit/depositions/{record}')['conceptrecid']
-        open_drafts = [d for d in call(f'{URL}/api/deposit/depositions?status=draft') if d['conceptrecid'] == concept and not d['submitted']]
-        if open_drafts:
-            draft = call(open_drafts[0]['links']['self'])
-            print(f"Adding to the open draft {draft['id']}.")
-        else:
-            draft = call(call(f'{URL}/api/deposit/depositions/{record}/actions/newversion', 'POST')['links']['latest_draft'])
+def push(ds, record, changed, remote, draft):
+    """upload the changed zips into the open draft, or into a new draft of the record, or of a new record"""
+    for key, (case, files) in changed.items():
+        if remote.get(key, {}).keys() - files.keys():  # the zip would lose files the datastore never pulled
+            sys.exit(f'{case}: pull with --model-results first')
+    if draft:
+        print(f"Adding to the open draft {draft['id']}.")
+    elif record:
+        draft = call(call(f'{URL}/api/deposit/depositions/{record}/actions/newversion', 'POST')['links']['latest_draft'])
     else:
         draft = call(f'{URL}/api/deposit/depositions', 'POST', {})
-    old = {f['filename']: f for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")}
+    old = {f['filename']: f['id'] for f in call(f"{URL}/api/deposit/depositions/{draft['id']}/files")}
     with tempfile.TemporaryDirectory() as tmp:
         for key, (case, files) in changed.items():
-            if key in old:  # a zip of the draft that already has all these files is left as it is
-                draft_zip = RemoteFile(f"{draft['links']['bucket']}/{key}", int(old[key]['filesize']), {'Authorization': f'Bearer {TOKEN}'})
-                if files.items() <= {i.filename: i.CRC for i in zipfile.ZipFile(draft_zip).infolist()}.items():
-                    print(f'in the draft already: {case}  {labels(files)}')
-                    continue
-                call(f"{URL}/api/deposit/depositions/{draft['id']}/files/{old[key]['id']}", 'DELETE')
             with zipfile.ZipFile(f'{tmp}/{key}', 'w', zipfile.ZIP_DEFLATED) as z:
                 for path in files:
                     z.write(f'{ds}/{path}', path)
+            if key in old:
+                call(f"{URL}/api/deposit/depositions/{draft['id']}/files/{old[key]}", 'DELETE')
             with open(f'{tmp}/{key}', 'rb') as f:
                 call(f"{draft['links']['bucket']}/{key}", 'PUT', f, 'application/octet-stream', os.path.getsize(f'{tmp}/{key}'))
             print(f'pushed {case}  {labels(files)}')
@@ -166,7 +182,7 @@ parser.add_argument('--record')
 parser.add_argument('--model-results', action='store_true', help='also pull the model runs')
 args = parser.parse_args()
 
-remote, pulled = pull(args.datastore, args.record, args.model_results)
+remote, pulled, draft = pull(args.datastore, args.record, args.model_results)
 changed = changes(args.datastore, remote)
 if not changed:
     print('Nothing to upload.' if pulled else 'The datastore and Zenodo are in sync.')
@@ -177,4 +193,4 @@ elif not TOKEN:
         print(f'  {case}')
     print('To upload them, set ZENODO_TOKEN or save the token in sync/.token.')
 else:
-    push(args.datastore, args.record, changed)
+    push(args.datastore, args.record, changed, remote, draft)
