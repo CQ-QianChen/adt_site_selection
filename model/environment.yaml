@@ -1,8 +1,8 @@
-name: yaml2nuctrans
+name: model
 channels:
   - conda-forge
 dependencies:
   - pip
-  - python=3.10
+  - python=3.12
   - pip:
       - git+https://github.com/CQ-QianChen/yaml2nuctrans.git@latest
