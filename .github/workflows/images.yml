@@ -5,7 +5,7 @@ name: Module images
 # build: one image per module and platform, on a native runner. Not for pull requests.
 # merge: joins the platforms of a module into the tags main and sha-<commit>
 #        on ghcr.io/<repo>/<module>.
-# Only modules with linux-aarch64 in their lock get an arm64 image (not communication_sdh, model).
+# Only modules with linux-aarch64 in their lock get an arm64 image (not communication_sdh, model, sampling).
 
 on:
   push:
@@ -112,7 +112,6 @@ jobs:
           - {module: decision_support_uq, platform: linux/arm64, runner: ubuntu-24.04-arm}
           - {module: model, platform: linux/amd64, runner: ubuntu-latest}
           - {module: sampling, platform: linux/amd64, runner: ubuntu-latest}
-          - {module: sampling, platform: linux/arm64, runner: ubuntu-24.04-arm}
           - {module: surrogate, platform: linux/amd64, runner: ubuntu-latest}
           - {module: surrogate, platform: linux/arm64, runner: ubuntu-24.04-arm}
     steps:

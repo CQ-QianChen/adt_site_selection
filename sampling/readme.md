@@ -5,7 +5,7 @@ without running any OGS simulations
 
 ## Usage (example)
 
-Go to the directory that contains ``sampling_func.py``, then run:
+In the ``yaml2nuctrans`` environment (``sampling/environment.yaml``), run:
 
 
 optional (allow the access to the file):
@@ -21,7 +21,7 @@ The ``Case3_Claystone.sh`` file has the following entries:
 
 ```
 #!/bin/bash
-python -m sampling_func \
+python -m yaml2nuctrans.sampling.sampling_func \
 --config ./input/sampling_config_Case3_Claystone.yaml \
 --sample_size 4 \
 --sampling_method sobol \

@@ -5,4 +5,4 @@ dependencies:
   - pip
   - python=3.10
   - pip:
-      - git+https://github.com/CQ-QianChen/yaml2nuctrans.git@v1.0.0
+      - git+https://github.com/CQ-QianChen/yaml2nuctrans.git@latest

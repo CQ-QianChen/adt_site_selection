@@ -5,7 +5,6 @@ process SAMPLING {
     publishDir { "$projectDir/datastore/${scenario_name}/${hash8}" }, mode: 'copy'
 
     input:
-    path script
     val uncertain_parameters
     val sampling_config
     val scenario_name
@@ -24,7 +23,7 @@ process SAMPLING {
 
     mkdir -p sampled_data
 
-    python ${script} \
+    python -m yaml2nuctrans.sampling.sampling_func \
       --config config.yaml \
       --sample_size ${sampling_config.sample_size} \
       --sampling_method ${sampling_config.sampling_method} \

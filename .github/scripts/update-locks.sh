@@ -7,7 +7,7 @@ set -euo pipefail
 
 platforms() {
   case "$1" in
-    model|communication_sdh) echo "-p linux-64" ;;
+    model|sampling|communication_sdh) echo "-p linux-64" ;;
     *)     echo "-p linux-64 -p linux-aarch64" ;;
   esac
 }

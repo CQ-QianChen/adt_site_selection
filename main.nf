@@ -153,7 +153,6 @@ workflow scenario {
 
     if( !file("${engine_dir}/engine.h5").exists() ) {
         SAMPLING_TRAINING(
-            file("$moduleDir/sampling/sampling_func.py"),
             scenario_config.uncertain_parameters,
             sampling_config.training,
             scenario_name,
@@ -165,7 +164,6 @@ workflow scenario {
         )
 
         SAMPLING_VALIDATION(
-            file("$moduleDir/sampling/sampling_func.py"),
             scenario_config.uncertain_parameters,
             sampling_config.validation,
             scenario_name,

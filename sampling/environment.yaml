@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10
-  - numpy
-  - scipy
-  - pyyaml
-  - h5py
+  - pip
+  - pip:
+      - git+https://github.com/CQ-QianChen/yaml2nuctrans.git@latest
