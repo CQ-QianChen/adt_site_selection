@@ -22,5 +22,6 @@ fi
 
 for m in "${modules[@]}"; do
   echo "[$m]"
+  rm -f "$m/conda-lock.yml"
   conda-lock lock -f "$m/environment.yaml" $(platforms "$m") --lockfile "$m/conda-lock.yml"
 done
