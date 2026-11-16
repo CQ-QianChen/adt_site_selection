@@ -27,7 +27,6 @@ def defaultsConfig() {
         model: [
             create_meshes: true,
             mesh_dimension: 1,
-            quantity_of_interests: ['concentration', 'Flux'],
             process_variables: ['pressure', 'concentration'],
             secondary_variables: ['Flux'],
             sim_setup: [

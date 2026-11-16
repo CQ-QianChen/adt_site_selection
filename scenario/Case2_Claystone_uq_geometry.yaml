@@ -101,6 +101,7 @@ uncertain_parameters:
       - Host_rock_bottom
 
 model:
+  quantity_of_interests: [concentration, Flux]
   create_python_bc: True
   python_bc_source_value: 0.0022
   source:
