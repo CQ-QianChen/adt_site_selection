@@ -330,10 +330,10 @@ package:
   dependencies:
     __glibc: '>=2.17,<3.0.a0'
     libgcc: '>=15'
-  url: https://conda.anaconda.org/conda-forge/linux-64/libuuid-2.42.4-hcfc3c73_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/libuuid-2.42.4-hcfc3c73_1.conda
   hash:
-    md5: 54a948337e66706380ff24d6b5fde63f
-    sha256: f34b8d1de9a2bf62476d8608057d9b8a918d97444236dc53a47128f2fae79041
+    md5: d852293faea3c04a6e896b908b43aded
+    sha256: 0e2e8f2daa9306e67f046e31092d637431d8cf0a26c407ab22401d108c2d4631
   category: main
   optional: false
 - name: libuuid
@@ -342,10 +342,10 @@ package:
   platform: linux-aarch64
   dependencies:
     libgcc: '>=15'
-  url: https://conda.anaconda.org/conda-forge/linux-aarch64/libuuid-2.42.4-hd6fdeab_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-aarch64/libuuid-2.42.4-hd6fdeab_1.conda
   hash:
-    md5: 9d63e86dc027166aaaeb0c99a0a90fd7
-    sha256: 4d94770cc7c47eb4a0d7b92f16d7a450506d1a82406d63c987d6208ab2fb8a16
+    md5: 394dc5a24e06bdea0b41389d1eee9a23
+    sha256: 66d4d6201d52b4e3679dcfcc73658902a1cfb1a096f9d72a7b2d93d78e13948a
   category: main
   optional: false
 - name: libxcrypt
@@ -477,13 +477,14 @@ package:
   manager: conda
   platform: linux-64
   dependencies:
+    ca-certificates: '>=2026.10.19'
     python: '>=3.11,<3.13.0a0'
     setuptools: ''
     wheel: ''
-  url: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh8b19718_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh8b19718_2.conda
   hash:
-    md5: ec04c2ab74b2ca2d524fc10f558427c6
-    sha256: 83babe5e3c4021b061275164a7c28bd62d183cc77b4c2260ae80f19fcb0a98dd
+    md5: 475fb40617684d16415f574187bc974b
+    sha256: 27543e132e4f80285e638a08d6d90de631227186ba96901e1e069fa587d9e62f
   category: main
   optional: false
 - name: pip
@@ -491,13 +492,14 @@ package:
   manager: conda
   platform: linux-aarch64
   dependencies:
+    ca-certificates: '>=2026.10.19'
     python: '>=3.11,<3.13.0a0'
     setuptools: ''
     wheel: ''
-  url: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh8b19718_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pip-26.2.2-pyh8b19718_2.conda
   hash:
-    md5: ec04c2ab74b2ca2d524fc10f558427c6
-    sha256: 83babe5e3c4021b061275164a7c28bd62d183cc77b4c2260ae80f19fcb0a98dd
+    md5: 475fb40617684d16415f574187bc974b
+    sha256: 27543e132e4f80285e638a08d6d90de631227186ba96901e1e069fa587d9e62f
   category: main
   optional: false
 - name: python
@@ -1105,25 +1107,27 @@ package:
   category: main
   optional: false
 - name: importlib-metadata
-  version: 10.1.0
+  version: 10.2.0
   manager: pip
   platform: linux-64
   dependencies:
+    lazy-importer: '>=0.1'
     zipp: '>=3.20'
-  url: https://files.pythonhosted.org/packages/65/b6/495438ad95e0102aff8f6786b5474202f38cd5d4700d03a72b77977dec10/importlib_metadata-10.1.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/7f/61/0c0fae37eb561d8fddb788cbae0f227051628d70d67498a8a116c1f547d7/importlib_metadata-10.2.0-py3-none-any.whl
   hash:
-    sha256: cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7
+    sha256: c7a4bf1c7479601f6b8e437cfc14f4f77028ba62a8f34ae95cd93d9774dfba51
   category: main
   optional: false
 - name: importlib-metadata
-  version: 10.1.0
+  version: 10.2.0
   manager: pip
   platform: linux-aarch64
   dependencies:
+    lazy-importer: '>=0.1'
     zipp: '>=3.20'
-  url: https://files.pythonhosted.org/packages/65/b6/495438ad95e0102aff8f6786b5474202f38cd5d4700d03a72b77977dec10/importlib_metadata-10.1.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/7f/61/0c0fae37eb561d8fddb788cbae0f227051628d70d67498a8a116c1f547d7/importlib_metadata-10.2.0-py3-none-any.whl
   hash:
-    sha256: cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7
+    sha256: c7a4bf1c7479601f6b8e437cfc14f4f77028ba62a8f34ae95cd93d9774dfba51
   category: main
   optional: false
 - name: joblib
@@ -1166,6 +1170,26 @@ package:
   url: https://files.pythonhosted.org/packages/c0/05/c941a139f27438c1910d630fdc3ccfdab7c8407c72052299ead12ece086e/kiwisolver-1.5.1-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
   hash:
     sha256: 719a35fa1156db3640555f95ebb94f60a444e64d1c69626b0edef5df78eba225
+  category: main
+  optional: false
+- name: lazy-importer
+  version: 0.1.0
+  manager: pip
+  platform: linux-64
+  dependencies: {}
+  url: https://files.pythonhosted.org/packages/0a/28/7ded071d0975dcc6d5d106ffbf7b3ca420f7caa3b8a235fa604b6e37032a/lazy_importer-0.1.0-py3-none-any.whl
+  hash:
+    sha256: bd93fab7bef18e842eea02b839410954d37889140dc64ca4d9680aec6880c739
+  category: main
+  optional: false
+- name: lazy-importer
+  version: 0.1.0
+  manager: pip
+  platform: linux-aarch64
+  dependencies: {}
+  url: https://files.pythonhosted.org/packages/0a/28/7ded071d0975dcc6d5d106ffbf7b3ca420f7caa3b8a235fa604b6e37032a/lazy_importer-0.1.0-py3-none-any.whl
+  hash:
+    sha256: bd93fab7bef18e842eea02b839410954d37889140dc64ca4d9680aec6880c739
   category: main
   optional: false
 - name: matplotlib
@@ -1288,12 +1312,12 @@ package:
     seaborn: '>=0.13.2'
     tqdm: '*'
     umbridge: '>=1.2.4'
-  url: git+https://github.com/thealanjason/nuctrans_fastuq.git@f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+  url: git+https://github.com/thealanjason/nuctrans_fastuq.git@9947400797771c7a10dfcd1f285c61104bcc33b9
   hash:
-    sha256: f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+    sha256: 9947400797771c7a10dfcd1f285c61104bcc33b9
   source:
     type: url
-    url: git+https://github.com/thealanjason/nuctrans_fastuq.git@f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+    url: git+https://github.com/thealanjason/nuctrans_fastuq.git@9947400797771c7a10dfcd1f285c61104bcc33b9
   category: main
   optional: false
 - name: nuctrans-fastuq
@@ -1316,12 +1340,12 @@ package:
     seaborn: '>=0.13.2'
     tqdm: '*'
     umbridge: '>=1.2.4'
-  url: git+https://github.com/thealanjason/nuctrans_fastuq.git@f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+  url: git+https://github.com/thealanjason/nuctrans_fastuq.git@9947400797771c7a10dfcd1f285c61104bcc33b9
   hash:
-    sha256: f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+    sha256: 9947400797771c7a10dfcd1f285c61104bcc33b9
   source:
     type: url
-    url: git+https://github.com/thealanjason/nuctrans_fastuq.git@f1fb786de5be4c73fd0067573bbfe5395e36ee1a
+    url: git+https://github.com/thealanjason/nuctrans_fastuq.git@9947400797771c7a10dfcd1f285c61104bcc33b9
   category: main
   optional: false
 - name: numpoly
@@ -1371,27 +1395,27 @@ package:
   category: main
   optional: false
 - name: pandas
-  version: 3.1.0
+  version: 3.1.1
   manager: pip
   platform: linux-64
   dependencies:
     numpy: '>=2.0.2'
     python-dateutil: '>=2.9.0'
-  url: https://files.pythonhosted.org/packages/14/41/2d264868728f7cb2add91a605bea5f2aabd3da41889ee97746a586ec34ee/pandas-3.1.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+  url: https://files.pythonhosted.org/packages/3a/a9/0770e9316611d45b9eb7bc5d1266a327b21d3c237fb288aa679ce419296e/pandas-3.1.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
   hash:
-    sha256: 0a28602573f50453b57802d282f9f8cb7663aa10201127ecbbe95ed4a41c64ce
+    sha256: 4f1602f614bb83f443381dbcbb94c4ac764b2e50c8d6c965614c5cd83e328c47
   category: main
   optional: false
 - name: pandas
-  version: 3.1.0
+  version: 3.1.1
   manager: pip
   platform: linux-aarch64
   dependencies:
     numpy: '>=2.0.2'
     python-dateutil: '>=2.9.0'
-  url: https://files.pythonhosted.org/packages/bf/4a/1064a6ec84ae047379a5969f6b331bd8d57013f08b30976564780fb0c9bd/pandas-3.1.0-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
+  url: https://files.pythonhosted.org/packages/33/b8/f771130a0d12b7664c4427b6f4b8a5f5352029c31a0cc2876e3259a4ab6a/pandas-3.1.1-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
   hash:
-    sha256: 388fad0c683ad061baabe23a76f43bf43c1d2c2fd46572b687082cfa195b7275
+    sha256: 593fb29eb5e51ab77ee37bda7ab2232aa1077088af7b4acbd18ca2f43f6c02f5
   category: main
   optional: false
 - name: pillow
@@ -1455,27 +1479,25 @@ package:
   category: main
   optional: false
 - name: python-dateutil
-  version: 3.0.0
+  version: 4.0.0
   manager: pip
   platform: linux-64
   dependencies:
-    six: '>=1.6'
     tzdata: '*'
-  url: https://files.pythonhosted.org/packages/5a/17/cebee01d1c0c1441174cf0456ddc91b280d79acb65340c05e41d77866ee8/python_dateutil-3.0.0-py2.py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/2f/a9/52b89563d154433d79b51ed1eb4842bf7334cb2696891a7fe135618853d7/python_dateutil-4.0.0-py3-none-any.whl
   hash:
-    sha256: 3c79630202e4152c6add678446984236efe4f57e84d8e892aab0637bab82e9fd
+    sha256: a5e246f79eb80475e691bf93862cead98decd8a498cf53ba0516fcdc0f50dc1c
   category: main
   optional: false
 - name: python-dateutil
-  version: 3.0.0
+  version: 4.0.0
   manager: pip
   platform: linux-aarch64
   dependencies:
-    six: '>=1.6'
     tzdata: '*'
-  url: https://files.pythonhosted.org/packages/5a/17/cebee01d1c0c1441174cf0456ddc91b280d79acb65340c05e41d77866ee8/python_dateutil-3.0.0-py2.py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/2f/a9/52b89563d154433d79b51ed1eb4842bf7334cb2696891a7fe135618853d7/python_dateutil-4.0.0-py3-none-any.whl
   hash:
-    sha256: 3c79630202e4152c6add678446984236efe4f57e84d8e892aab0637bab82e9fd
+    sha256: a5e246f79eb80475e691bf93862cead98decd8a498cf53ba0516fcdc0f50dc1c
   category: main
   optional: false
 - name: pyyaml
@@ -1604,44 +1626,24 @@ package:
     sha256: 636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987
   category: main
   optional: false
-- name: six
-  version: 1.17.0
+- name: threadpoolctl
+  version: 3.8.0
   manager: pip
   platform: linux-64
   dependencies: {}
-  url: https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/54/1b/831f2de4840a25db1dd7b1afea433ccafe6bb10aca07e13264f2079462d0/threadpoolctl-3.8.0-py3-none-any.whl
   hash:
-    sha256: 4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
-  category: main
-  optional: false
-- name: six
-  version: 1.17.0
-  manager: pip
-  platform: linux-aarch64
-  dependencies: {}
-  url: https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl
-  hash:
-    sha256: 4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+    sha256: f1b49c82704d50f13ffae019c727b0fa4f6791a58f48f06a09c45face1be66da
   category: main
   optional: false
 - name: threadpoolctl
-  version: 3.7.0
-  manager: pip
-  platform: linux-64
-  dependencies: {}
-  url: https://files.pythonhosted.org/packages/43/3f/f88a53f60a472b46f4023f56d204dd7de33d34c5d2acbfa0d70a674e639e/threadpoolctl-3.7.0-py3-none-any.whl
-  hash:
-    sha256: cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be
-  category: main
-  optional: false
-- name: threadpoolctl
-  version: 3.7.0
+  version: 3.8.0
   manager: pip
   platform: linux-aarch64
   dependencies: {}
-  url: https://files.pythonhosted.org/packages/43/3f/f88a53f60a472b46f4023f56d204dd7de33d34c5d2acbfa0d70a674e639e/threadpoolctl-3.7.0-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/54/1b/831f2de4840a25db1dd7b1afea433ccafe6bb10aca07e13264f2079462d0/threadpoolctl-3.8.0-py3-none-any.whl
   hash:
-    sha256: cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be
+    sha256: f1b49c82704d50f13ffae019c727b0fa4f6791a58f48f06a09c45face1be66da
   category: main
   optional: false
 - name: tqdm
@@ -1685,23 +1687,23 @@ package:
   category: main
   optional: false
 - name: tzdata
-  version: '2026.5'
+  version: '2026.6'
   manager: pip
   platform: linux-64
   dependencies: {}
-  url: https://files.pythonhosted.org/packages/94/21/1e5995a1c920cce14e4bffae20c665ec10e7ed03ab25e006cd741092b718/tzdata-2026.5-py2.py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/0a/66/9a06c2227fedfd4919f0eaaa8b94377d9730882a7e4f95823c9a331ab5e1/tzdata-2026.6-py2.py3-none-any.whl
   hash:
-    sha256: b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac
+    sha256: 0a10eec6e13ef16b627fabed9a5f2ba61a62b1c67f327305f4e7e412a70b4aec
   category: main
   optional: false
 - name: tzdata
-  version: '2026.5'
+  version: '2026.6'
   manager: pip
   platform: linux-aarch64
   dependencies: {}
-  url: https://files.pythonhosted.org/packages/94/21/1e5995a1c920cce14e4bffae20c665ec10e7ed03ab25e006cd741092b718/tzdata-2026.5-py2.py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/0a/66/9a06c2227fedfd4919f0eaaa8b94377d9730882a7e4f95823c9a331ab5e1/tzdata-2026.6-py2.py3-none-any.whl
   hash:
-    sha256: b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac
+    sha256: 0a10eec6e13ef16b627fabed9a5f2ba61a62b1c67f327305f4e7e412a70b4aec
   category: main
   optional: false
 - name: umbridge
