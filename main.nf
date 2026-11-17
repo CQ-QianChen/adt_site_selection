@@ -87,7 +87,6 @@ def defaultsConfig() {
             run_mode: 'ensemble',
             save_sampled_data: 'True'
         ],
-        // type, output_qoi, z_interest, t_interest, qoi_floor, transform, pce_opts.q_norm and pce_opts.degree are per-case and have no default
         surrogate: [
             n_init: null,
             seed: 0,
